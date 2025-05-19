@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SonitCustom.Controller")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1783ebe2f86dd800411218b0e09337b7a341e302")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+07be664fdc642bf344856728ba7411a3a02b771b")]
 [assembly: System.Reflection.AssemblyProductAttribute("SonitCustom.Controller")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SonitCustom.Controller")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
