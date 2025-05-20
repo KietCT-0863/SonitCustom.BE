@@ -104,28 +104,10 @@ namespace SonitCustom.BLL.Services
 
         private async Task<string> GenerateProductId(string category)
         {
-            var products = await _productRepository.GetProductsByCategoryAsync(category);
-            string prefix = category.ToLower() switch
-            {
-                "extender" => "ext",
-                "joint protector" => "jp",
-                "butt protector" => "bp",
-                _ => throw new ArgumentException("Invalid category")
-            };
+            int numberOfProducts = await _productRepository.GetNumberOfProductByCategoryAsync(category);
+            string prefix = await _categoryRepository.GetPrefixFromCategoryName(category);
 
-            if (!products.Any())
-            {
-                return $"{prefix}001";
-            }
-
-            var maxNumber = products
-                .Select(p => p.ProId)
-                .Where(id => id.StartsWith(prefix))
-                .Select(id => int.Parse(id.Substring(prefix.Length)))
-                .DefaultIfEmpty(0)
-                .Max();
-
-            return $"{prefix}{(maxNumber + 1):D3}";
+            return $"{prefix}{(numberOfProducts + 1):D3}";
         }
 
         //// Update existing product

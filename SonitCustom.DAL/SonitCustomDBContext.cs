@@ -57,6 +57,7 @@ public partial class SonitCustomDBContext : DbContext
             entity.Property(e => e.CateName)
                 .IsRequired()
                 .HasMaxLength(100);
+            entity.Property(e => e.Prefix).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Product>(entity =>

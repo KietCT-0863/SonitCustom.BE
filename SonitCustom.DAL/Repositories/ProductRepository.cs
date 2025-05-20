@@ -59,11 +59,11 @@ namespace SonitCustom.DAL.Repositories
             return true;
         }
 
-        public async Task<List<Product>> GetProductsByCategoryAsync(string category)
+        public async Task<int> GetNumberOfProductByCategoryAsync(string category)
         {
             return await _context.Products
                 .Where(p => p.CategoryNavigation.CateName == category)
-                .ToListAsync();
+                .CountAsync();
         }
     }
 } 

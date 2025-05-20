@@ -11,6 +11,6 @@ namespace SonitCustom.DAL.Interface
         Task<Product> CreateProductAsync(Product product);
         Task<Product> UpdateProductAsync(Product product);
         Task<bool> DeleteProductAsync(string id);
-        Task<List<Product>> GetProductsByCategoryAsync(string category);
+        Task<int> GetNumberOfProductByCategoryAsync(string category);
     }
 } 

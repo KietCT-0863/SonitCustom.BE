@@ -11,5 +11,7 @@ public partial class Category
 
     public string CateName { get; set; }
 
+    public string Prefix { get; set; }
+
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }
