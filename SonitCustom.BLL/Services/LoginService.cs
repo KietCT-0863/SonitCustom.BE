@@ -28,7 +28,7 @@ namespace SonitCustom.BLL.Services
         public async Task<UserDTO> LoginAsync(string username, string password)
         {
             // Gọi repository để lấy user
-            user user = await _userRepository.GetUserAsync(username, password);
+            User user = await _userRepository.GetUserAsync(username, password);
 
             // Trả về null nếu không tìm thấy người dùng hoặc thông tin đăng nhập không đúng
             if (user == null)

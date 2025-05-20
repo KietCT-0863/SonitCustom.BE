@@ -18,9 +18,13 @@ public partial class SonitCustomDBContext : DbContext
     {
     }
 
-    public virtual DbSet<role> roles { get; set; }
+    public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<user> users { get; set; }
+    public virtual DbSet<Product> Products { get; set; }
+
+    public virtual DbSet<Role> Roles { get; set; }
+
+    public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -44,16 +48,73 @@ public partial class SonitCustomDBContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<role>(entity =>
+        modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.roleId).HasName("PK__role__CD98462A2DCC03F0");
+            entity.HasKey(e => e.CateId).HasName("PK__Category__27638D14664E159C");
+
+            entity.ToTable("Category");
+
+            entity.Property(e => e.CateName)
+                .IsRequired()
+                .HasMaxLength(100);
         });
 
-        modelBuilder.Entity<user>(entity =>
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(e => e.ProId).HasName("PK__Product__6202959056ABE7C2");
+
+            entity.ToTable("Product");
+
+            entity.Property(e => e.ProId).HasMaxLength(50);
+            entity.Property(e => e.ImgUrl).HasMaxLength(255);
+            entity.Property(e => e.Price)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.ProName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.HasOne(d => d.CategoryNavigation).WithMany(p => p.Products)
+                .HasForeignKey(d => d.Category)
+                .HasConstraintName("FK__Product__Categor__3F466844");
+        });
+
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.roleId).HasName("PK__role__CD98462A2DCC03F0");
+
+            entity.ToTable("Role");
+
+            entity.Property(e => e.roleName)
+                .IsRequired()
+                .HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.id).HasName("PK__user__3213E83FF1D470E6");
 
-            entity.HasOne(d => d.roleNavigation).WithMany(p => p.users)
+            entity.ToTable("User");
+
+            entity.HasIndex(e => e.email, "UQ__user__AB6E61642BDCBC51").IsUnique();
+
+            entity.HasIndex(e => e.username, "UQ__user__F3DBC572421191F4").IsUnique();
+
+            entity.Property(e => e.email)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(e => e.fullname)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(e => e.password)
+                .IsRequired()
+                .HasMaxLength(255);
+            entity.Property(e => e.username)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.roleNavigation).WithMany(p => p.Users)
+                .HasForeignKey(d => d.role)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__user__role__3A81B327");
         });

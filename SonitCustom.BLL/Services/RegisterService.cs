@@ -15,9 +15,9 @@ namespace SonitCustom.BLL.Services
             _userRepository = userRepository;
         }
 
-        public async Task<user> RegisterAsync(RegisterUserDTO newRegister)
+        public async Task<User> RegisterAsync(RegisterUserDTO newRegister)
         {
-            user newUser = new user()
+            User newUser = new User()
             {
                 username = newRegister.Username,
                 password = newRegister.Password,

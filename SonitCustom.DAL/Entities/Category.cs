@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace SonitCustom.DAL.Entities;
 
-public partial class Role
+public partial class Category
 {
-    public int roleId { get; set; }
+    public int CateId { get; set; }
 
-    public string roleName { get; set; }
+    public string CateName { get; set; }
 
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
+    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }

@@ -6,6 +6,6 @@ namespace SonitCustom.BLL.Interface
 {
     public interface IRegisterService
     {
-        Task<user> RegisterAsync(RegisterUserDTO newUser);
+        Task<User> RegisterAsync(RegisterUserDTO newUser);
     }
 }

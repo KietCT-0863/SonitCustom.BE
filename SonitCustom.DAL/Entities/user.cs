@@ -2,39 +2,22 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace SonitCustom.DAL.Entities;
 
-[Table("user")]
-[Index("email", Name = "UQ__user__AB6E61642BDCBC51", IsUnique = true)]
-[Index("username", Name = "UQ__user__F3DBC572421191F4", IsUnique = true)]
-public partial class user
+public partial class User
 {
-    [Key]
     public int id { get; set; }
 
-    [Required]
-    [StringLength(50)]
     public string username { get; set; }
 
-    [Required]
-    [StringLength(100)]
     public string fullname { get; set; }
 
-    [Required]
-    [StringLength(100)]
     public string email { get; set; }
 
-    [Required]
-    [StringLength(255)]
     public string password { get; set; }
 
     public int role { get; set; }
 
-    [ForeignKey("role")]
-    [InverseProperty("users")]
-    public virtual role roleNavigation { get; set; }
+    public virtual Role roleNavigation { get; set; }
 }

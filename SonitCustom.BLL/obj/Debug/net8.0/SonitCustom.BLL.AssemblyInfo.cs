@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SonitCustom.BLL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+07be664fdc642bf344856728ba7411a3a02b771b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1d901a1fd78e0f52225e6a8b135811d7e103d396")]
 [assembly: System.Reflection.AssemblyProductAttribute("SonitCustom.BLL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SonitCustom.BLL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

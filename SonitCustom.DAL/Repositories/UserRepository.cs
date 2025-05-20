@@ -17,21 +17,21 @@ namespace SonitCustom.DAL.Repositories
             _context = context;
         }
 
-        public async Task<List<user>> GetAllUserAsync()
+        public async Task<List<User>> GetAllUserAsync()
         {
-            return await _context.users.Include(u => u.roleNavigation).ToListAsync();
+            return await _context.Users.Include(u => u.roleNavigation).ToListAsync();
         }
 
-        public async Task<user> AddNewUserAsync(user newUser)
+        public async Task<User> AddNewUserAsync(User newUser)
         {
-            await _context.users.AddAsync(newUser);
+            await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
             return newUser;
         }
 
-        public async Task<bool> UpdateUserAsync(user userToUpdate)
+        public async Task<bool> UpdateUserAsync(User userToUpdate)
         {
-            var existingUser = await _context.users.FindAsync(userToUpdate.id);
+            var existingUser = await _context.Users.FindAsync(userToUpdate.id);
             if (existingUser == null)
                 return false;
 
@@ -40,9 +40,9 @@ namespace SonitCustom.DAL.Repositories
             return true;
         }
 
-        public async Task<user?> GetUserAsync(string username, string password)
+        public async Task<User?> GetUserAsync(string username, string password)
         {
-            return await _context.users
+            return await _context.Users
                 .Include(u => u.roleNavigation)
                 .FirstOrDefaultAsync(u => u.username == username && u.password == password);
         }

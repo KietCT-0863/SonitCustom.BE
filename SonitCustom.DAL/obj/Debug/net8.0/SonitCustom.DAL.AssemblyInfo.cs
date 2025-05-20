@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SonitCustom.DAL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f66d6d2b72284d995f0caec3caf51ea4074c2880")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1d901a1fd78e0f52225e6a8b135811d7e103d396")]
 [assembly: System.Reflection.AssemblyProductAttribute("SonitCustom.DAL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SonitCustom.DAL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
