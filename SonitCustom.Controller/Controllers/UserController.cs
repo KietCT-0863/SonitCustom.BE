@@ -23,7 +23,7 @@ namespace SonitCustom.Controller.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             if (!JwtCookieHelper.IsAdmin(Request))
-                return Forbid();
+                return Unauthorized(new { message = "Chỉ admin mới có quyền truy cập" });
 
             var users = await _userService.GetAllUsersAsync();
             return Ok(users);
@@ -35,12 +35,9 @@ namespace SonitCustom.Controller.Controllers
         {
             var userInfo = JwtCookieHelper.GetUserInfoFromCookie(Request);
             if (userInfo == null)
-                return Forbid();
+                return Unauthorized();
 
-            var (userId, role) = userInfo.Value;
-            if (!JwtCookieHelper.IsAdmin(Request))
-                return Forbid();
-
+            var (userId, _) = userInfo.Value;
             var user = await _userService.GetUserByIdAsync(userId ?? -1);
 
             if (user == null)
