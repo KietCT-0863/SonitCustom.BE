@@ -26,6 +26,9 @@ namespace SonitCustom.Controller.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // Xóa cookie JWT cũ nếu có
+            Response.Cookies.Delete("jwt_token");
+
             UserDTO user = await _loginService.LoginAsync(loginModel.Username, loginModel.Password);
 
             if (user == null)
