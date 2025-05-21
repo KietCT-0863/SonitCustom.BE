@@ -22,6 +22,18 @@ namespace SonitCustom.Controller
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
+
             // Add configuration from environment variables
             //builder.Configuration.AddEnvironmentVariables();
 
@@ -83,6 +95,9 @@ namespace SonitCustom.Controller
             app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
+
+            // Use CORS
+            app.UseCors("AllowAll");
 
             app.UseAuthentication();
             app.UseAuthorization();
