@@ -28,9 +28,14 @@ namespace SonitCustom.Controller
                 options.AddPolicy("AllowAll",
                     builder =>
                     {
-                        builder.AllowAnyOrigin()
-                               .AllowAnyMethod()
-                               .AllowAnyHeader();
+                        builder.WithOrigins(
+                            "http://localhost:3000",
+                            "http://localhost:5173",
+                            "https://sonit-custom.vercel.app"
+                        )
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                     });
             });
 
