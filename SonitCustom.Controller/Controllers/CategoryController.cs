@@ -23,6 +23,7 @@ namespace SonitCustom.Controller.Controllers
             try
             { 
                 List<CategoryDTO> categories = await _categoryService.GetAllCategoriesAsync();
+
                 return Ok(categories);
             }
             catch (System.Exception ex)
@@ -42,6 +43,7 @@ namespace SonitCustom.Controller.Controllers
                 }
 
                 bool result = await _categoryService.CreateCategoryAsync(categoryName);
+
                 return Ok("Tạo category thành công");
             }
             catch (System.Exception ex)

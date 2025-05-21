@@ -22,22 +22,16 @@ namespace SonitCustom.DAL.Repositories
             return await _context.Users.Include(u => u.roleNavigation).ToListAsync();
         }
 
-        public async Task<User> AddNewUserAsync(User newUser)
+        public async Task AddNewUserAsync(User newUser)
         {
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
-            return newUser;
         }
 
-        public async Task<bool> UpdateUserAsync(User userToUpdate)
+        public async Task UpdateUserAsync(User userToUpdate)
         {
-            var existingUser = await _context.Users.FindAsync(userToUpdate.id);
-            if (existingUser == null)
-                return false;
-
-            _context.Entry(existingUser).CurrentValues.SetValues(userToUpdate);
+            _context.Entry(userToUpdate).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-            return true;
         }
 
         public async Task<User?> GetUserAsync(string username, string password)

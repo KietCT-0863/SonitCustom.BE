@@ -9,6 +9,5 @@ namespace SonitCustom.BLL.Interface
     {
         Task<UserDTO> GetUserByIdAsync(int id);
         Task<List<UserDTO>> GetAllUsersAsync();
-
     }
 } 

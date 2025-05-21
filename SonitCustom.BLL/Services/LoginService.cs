@@ -25,16 +25,15 @@ namespace SonitCustom.BLL.Services
             _configuration = configuration;
         }
 
-        public async Task<UserDTO> LoginAsync(string username, string password)
+        public async Task<UserDTO?> LoginAsync(string username, string password)
         {
-            // Gọi repository để lấy user
             User user = await _userRepository.GetUserAsync(username, password);
 
-            // Trả về null nếu không tìm thấy người dùng hoặc thông tin đăng nhập không đúng
             if (user == null)
+            {
                 return null;
+            }    
 
-            // Trả về thông tin người dùng nếu đăng nhập thành công
             UserDTO userDTO = new()
             {
                 Id = user.id,
@@ -49,8 +48,9 @@ namespace SonitCustom.BLL.Services
 
         public Task<string> GenerateJwtTokenAsync(UserDTO userDto)
         {
-            var jwtSettings = _configuration.GetSection("Jwt");
-            var claims = new[]
+            IConfigurationSection jwtSettings = _configuration.GetSection("Jwt");
+
+            Claim[] claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userDto.Username),
                 new Claim("userid", userDto.Id.ToString()),
@@ -58,10 +58,10 @@ namespace SonitCustom.BLL.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
+            SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
+            JwtSecurityToken token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
@@ -69,7 +69,8 @@ namespace SonitCustom.BLL.Services
                 signingCredentials: creds
             );
 
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+            string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
             return Task.FromResult(tokenString);
         }
     }

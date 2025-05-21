@@ -20,7 +20,6 @@ namespace SonitCustom.BLL.Services
             _categoryRepository = categoryRepository;
         }
 
-        // Get all products
         public async Task<List<ProductDTO>> GetAllProductsAsync()
         {
             try
@@ -39,12 +38,10 @@ namespace SonitCustom.BLL.Services
             }
             catch (Exception ex)
             {
-                // Log error here
                 throw new Exception("Error occurred while fetching products", ex);
             }
         }
 
-        // Get product by ID
         public async Task<ProductDTO> GetProductByIdAsync(string id)
         {
             try
@@ -67,13 +64,11 @@ namespace SonitCustom.BLL.Services
             }
             catch (Exception ex)
             {
-                // Log error here
                 throw new Exception($"Error occurred while fetching product with ID {id}", ex);
             }
         }
 
-        // Create new product
-        public async Task<bool> CreateProductAsync(CreateProductDTO product)
+        public async Task CreateProductAsync(CreateProductDTO product)
         {
             try
             {
@@ -82,8 +77,8 @@ namespace SonitCustom.BLL.Services
                     throw new ArgumentNullException(nameof(product));
                 }
 
-                var proId = await GenerateProductId(product.Category);
-                var proCate = await _categoryRepository.GetCategoryIdByNameAsync(product.Category);
+                string proId = await GenerateProductId(product.Category);
+                int proCate = await _categoryRepository.GetCategoryIdByNameAsync(product.Category);
 
                 Product newProduct = new()
                 {
@@ -95,12 +90,10 @@ namespace SonitCustom.BLL.Services
                     Category = proCate
                 };
 
-                var createdProduct = await _productRepository.CreateProductAsync(newProduct);
-                return true;
+                await _productRepository.CreateProductAsync(newProduct);
             }
             catch (Exception ex)
             {
-                // Log error here
                 throw new Exception("Error occurred while creating product", ex);
             }
         }
@@ -113,8 +106,7 @@ namespace SonitCustom.BLL.Services
             return $"{prefix}{(numberOfProducts + 1):D3}";
         }
 
-        // Update existing product
-        public async Task<Product> UpdateProductAsync(string id, UpdateProductDTO product)
+        public async Task<bool> UpdateProductAsync(string id, UpdateProductDTO product)
         {
             try
             {
@@ -123,7 +115,6 @@ namespace SonitCustom.BLL.Services
                     throw new ArgumentNullException(nameof(product));
                 }
 
-                // Check if product exists
                 Product existProduct = await _productRepository.GetProductByIdAsync(id);
                 if (existProduct == null)
                 {
@@ -135,32 +126,31 @@ namespace SonitCustom.BLL.Services
                 existProduct.ImgUrl = string.IsNullOrEmpty(product.ImgUrl) ? existProduct.ImgUrl : product.ImgUrl;
                 existProduct.Price = string.IsNullOrEmpty(product.Price) ? existProduct.Price : product.Price;
 
-                return await _productRepository.UpdateProductAsync(existProduct);
+                await _productRepository.UpdateProductAsync(existProduct);
+                return true;
             }
             catch (Exception ex)
             {
-                // Log error here
                 throw new Exception($"Error occurred while updating product with ID {id}", ex);
             }
         }
 
-        // Delete product
         public async Task<bool> DeleteProductAsync(string id)
         {
             try
             {
-                // Check if product exists
                 Product existProduct = await _productRepository.GetProductByIdAsync(id);
+
                 if (existProduct == null)
                 {
                     throw new Exception($"Product with ID {id} not found");
                 }
 
-                return await _productRepository.DeleteProductAsync(id);
+                await _productRepository.DeleteProductAsync(existProduct);
+                return true;
             }
             catch (Exception ex)
             {
-                // Log error here
                 throw new Exception($"Error occurred while deleting product with ID {id}", ex);
             }
         }

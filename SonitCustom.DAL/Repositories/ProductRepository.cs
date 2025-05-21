@@ -32,31 +32,24 @@ namespace SonitCustom.DAL.Repositories
         }
 
         // Create new product
-        public async Task<Product> CreateProductAsync(Product product)
+        public async Task CreateProductAsync(Product product)
         {
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
-            return product;
         }
 
         // Update existing product
-        public async Task<Product> UpdateProductAsync(Product product)
+        public async Task UpdateProductAsync(Product product)
         {
             _context.Entry(product).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-            return product;
         }
 
         // Delete product
-        public async Task<bool> DeleteProductAsync(string id)
+        public async Task DeleteProductAsync(Product product)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-                return false;
-
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
-            return true;
         }
 
         public async Task<int> GetNumberOfProductByCategoryAsync(string category)

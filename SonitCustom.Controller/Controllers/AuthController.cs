@@ -24,15 +24,19 @@ namespace SonitCustom.Controller.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDTO loginModel)
         {
             if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
+            }    
 
-            // Xóa cookie JWT cũ nếu có
+            // Xóa cookie cũ nếu có
             Response.Cookies.Delete("jwt_token");
 
             UserDTO user = await _loginService.LoginAsync(loginModel.Username, loginModel.Password);
 
             if (user == null)
+            {
                 return Unauthorized(new { message = "Tên đăng nhập hoặc mật khẩu không hợp lệ" });
+            }    
 
             // Sinh JWT token
             var token = await _loginService.GenerateJwtTokenAsync(user);
@@ -41,7 +45,7 @@ namespace SonitCustom.Controller.Controllers
             JwtCookieHelper.SetJwtCookie(Response, token);
 
             // Trả về message thành công, không trả về user, không trả về token
-            return Ok(new { message = "Đăng nhập thành công" });
+            return Ok(new { message ="Đăng nhập thành công" });
         }
     }
 } 

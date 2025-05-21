@@ -10,8 +10,8 @@ namespace SonitCustom.DAL.Repositories
     public interface IUserRepository
     {
         Task<List<User>> GetAllUserAsync();
-        Task<User> AddNewUserAsync(User newUser);
-        Task<bool> UpdateUserAsync(User userToUpdate);
+        Task AddNewUserAsync(User newUser);
+        Task UpdateUserAsync(User userToUpdate);
 
         Task<User> GetUserAsync(string username, string password);
     }

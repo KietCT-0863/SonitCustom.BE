@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
+using System.Security.Claims;
 
 namespace SonitCustom.Controller.Helpers
 {
@@ -8,12 +9,14 @@ namespace SonitCustom.Controller.Helpers
     {
         public static (int? userId, string role)? GetUserInfoFromCookie(HttpRequest request)
         {
-            var token = request.Cookies["jwt_token"];
+            string? token = request.Cookies["jwt_token"];
+
             if (string.IsNullOrEmpty(token))
                 return null;
 
-            var handler = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken;
+
             try
             {
                 jwtToken = handler.ReadJwtToken(token);
@@ -23,13 +26,18 @@ namespace SonitCustom.Controller.Helpers
                 return null;
             }
 
-            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userid");
-            var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "role");
+            Claim? userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userid");
+            Claim? roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "role");
+
             if (userIdClaim == null || roleClaim == null)
+            {
                 return null;
+            }    
 
             if (!int.TryParse(userIdClaim.Value, out int userId))
+            {
                 return null;
+            }    
 
             return (userId, roleClaim.Value);
         }
@@ -47,11 +55,12 @@ namespace SonitCustom.Controller.Helpers
 
         public static bool IsAdmin(HttpRequest request)
         {
-            var token = request.Cookies["jwt_token"];
+            string? token = request.Cookies["jwt_token"];
             if (string.IsNullOrEmpty(token)) return false;
 
-            var handler = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken;
+
             try
             {
                 jwtToken = handler.ReadJwtToken(token);
@@ -61,8 +70,9 @@ namespace SonitCustom.Controller.Helpers
                 return false;
             }
 
-            var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "role");
-            var role = roleClaim?.Value;
+            Claim? roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "role");
+            string? role = roleClaim?.Value;
+
             return role != null && role.ToLower() == "admin";
         }
     }

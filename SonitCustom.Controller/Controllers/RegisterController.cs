@@ -20,14 +20,26 @@ namespace SonitCustom.Controller.Controllers
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterUserDTO newRegister)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            var createdUser = await _registerService.RegisterAsync(newRegister);
-            if (createdUser == null)
-                return BadRequest(new { message = "Đăng ký thất bại" });
+                bool createdUser = await _registerService.RegisterAsync(newRegister);
 
-            return Ok(new { message = "Đăng ký thành công" });
+                if (createdUser == null)
+                {
+                    return BadRequest(new { message = "Đăng ký thất bại" });
+                }
+
+                return Ok(new { message = "Đăng ký thành công" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 } 

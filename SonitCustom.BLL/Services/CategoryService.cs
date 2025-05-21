@@ -27,13 +27,16 @@ namespace SonitCustom.BLL.Services
                 CateName = categoryName,
                 Prefix = newPrefix
             };
+            
             await _categoryRepository.CreateCategoryAsync(category);
+
             return true;
         }
 
         public async Task<List<CategoryDTO>> GetAllCategoriesAsync()
         {
-            var categories = await _categoryRepository.GetAllCategoriesAsync();
+            List<Category> categories = await _categoryRepository.GetAllCategoriesAsync();
+
             return categories.Select(c => new CategoryDTO
             {
                 CateId = c.CateId,
@@ -44,25 +47,20 @@ namespace SonitCustom.BLL.Services
 
         private async Task<string> GeneratePrefixFromCategory(string category)
         {
-            // Tách category thành các từ
-            var words = category.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string[] words = category.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
             string newPrefix;
 
             if (words.Length == 1)
             {
-                // Nếu chỉ có 1 từ, lấy 3 chữ đầu tiên
                 newPrefix = words[0].Length >= 3 ? words[0].Substring(0, 3) : words[0].PadRight(3, 'x');
             }
             else
             {
-                // Nếu có nhiều từ, lấy chữ đầu của mỗi từ
                 newPrefix = string.Join("", words.Select(w => w[0]));
             }
 
-            // Kiểm tra prefix đã tồn tại chưa
             bool prefixExists = await _categoryRepository.CheckPrefixExistsAsync(newPrefix);
             
-            // Nếu prefix đã tồn tại, trả về SONIT
             return prefixExists ? "sonit" : newPrefix;
         }
     }

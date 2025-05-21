@@ -30,6 +30,7 @@ namespace SonitCustom.Controller.Controllers
             try
             {
                 List<ProductDTO> products = await _productService.GetAllProductsAsync();
+
                 return Ok(products);
             }
             catch (Exception ex)
@@ -73,8 +74,9 @@ namespace SonitCustom.Controller.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var createdProduct = await _productService.CreateProductAsync(product);
-                return Ok("Đã thêm sản phẩm thành công!");
+                await _productService.CreateProductAsync(product);
+
+                return Ok(new { message = "Thêm sản phẩm thành công" });
             }
             catch (Exception ex)
             {
@@ -98,8 +100,9 @@ namespace SonitCustom.Controller.Controllers
                     return BadRequest(ModelState);
                 }
 
-                Product updatedProduct = await _productService.UpdateProductAsync(id, product);
-                return Ok("Đã chỉnh sửa sản phẩm thành công!");
+                bool updatedProduct = await _productService.UpdateProductAsync(id, product);
+
+                return Ok(new { message = "Chỉnh sửa sản phẩm thành công" });
             }
             catch (Exception ex)
             {
@@ -119,11 +122,13 @@ namespace SonitCustom.Controller.Controllers
                 }
 
                 var result = await _productService.DeleteProductAsync(id);
+
                 if (!result)
                 {
                     return NotFound($"Product with ID {id} not found");
                 }
-                return Ok("Đã xoá sản phẩm thành công!");
+
+                return Ok(new { message = "Đã xoá sản phẩm thành công" });
             }
             catch (Exception ex)
             {

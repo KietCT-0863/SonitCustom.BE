@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using SonitCustom.BLL.DTOs;
 using SonitCustom.BLL.Interface;
@@ -15,19 +16,26 @@ namespace SonitCustom.BLL.Services
             _userRepository = userRepository;
         }
 
-        public async Task<User> RegisterAsync(RegisterUserDTO newRegister)
+        public async Task<bool> RegisterAsync(RegisterUserDTO newRegister)
         {
-            User newUser = new User()
+            try
             {
-                username = newRegister.Username,
-                password = newRegister.Password,
-                fullname = newRegister.Fullname,
-                email = newRegister.Email,
-                role = 2
-            };
+                User newUser = new User()
+                {
+                    username = newRegister.Username,
+                    password = newRegister.Password,
+                    fullname = newRegister.Fullname,
+                    email = newRegister.Email,
+                    role = 2
+                };
 
-            // Có thể kiểm tra trùng username/email ở đây nếu muốn
-            return await _userRepository.AddNewUserAsync(newUser);
+                await _userRepository.AddNewUserAsync(newUser);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi đăng ký người dùng", ex);
+            }
         }
     }
-} 
+}

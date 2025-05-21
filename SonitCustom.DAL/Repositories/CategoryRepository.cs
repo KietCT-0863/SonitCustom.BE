@@ -18,8 +18,9 @@ namespace SonitCustom.DAL.Repositories
 
         public async Task<int> GetCategoryIdByNameAsync(string cateName)
         {
-            var category = await _context.Categories
+            Category? category = await _context.Categories
                 .FirstOrDefaultAsync(c => c.CateName.ToLower() == cateName.ToLower());
+
             return category?.CateId ?? throw new ArgumentException($"Category with name '{cateName}' not found");
         }
 
@@ -32,13 +33,15 @@ namespace SonitCustom.DAL.Repositories
         {
             await _context.Categories.AddAsync(category);
             await _context.SaveChangesAsync();
+
             return category;
         }
 
         public async Task<string> GetPrefixFromCategoryName(string categoryName)
         {
-            var category = await _context.Categories
+            Category? category = await _context.Categories
                 .FirstOrDefaultAsync(c => c.CateName.ToLower() == categoryName.ToLower());
+
             return category?.Prefix ?? throw new ArgumentException($"Category with name '{categoryName}' not found");
         }
 

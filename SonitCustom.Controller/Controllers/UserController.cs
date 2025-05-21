@@ -35,21 +35,13 @@ namespace SonitCustom.Controller.Controllers
         {
             var userInfo = JwtCookieHelper.GetUserInfoFromCookie(Request);
             if (userInfo == null)
-            {
-                // Xóa cookie JWT nếu không lấy được thông tin người dùng
-                Response.Cookies.Delete("jwt_token");
-                return Unauthorized(new { message = "Phiên đăng nhập không hợp lệ" });
-            }
+                return Unauthorized();
 
             var (userId, _) = userInfo.Value;
             var user = await _userService.GetUserByIdAsync(userId ?? -1);
 
             if (user == null)
-            {
-                // Xóa cookie JWT nếu không tìm thấy người dùng
-                Response.Cookies.Delete("jwt_token");
                 return NotFound(new { message = "Không tìm thấy người dùng" });
-            }
             return Ok(user);
         }
     }

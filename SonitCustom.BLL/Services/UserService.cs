@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SonitCustom.BLL.DTOs;
 using SonitCustom.BLL.Interface;
+using SonitCustom.DAL.Entities;
 using SonitCustom.DAL.Repositories;
 
 namespace SonitCustom.BLL.Services
@@ -18,8 +19,13 @@ namespace SonitCustom.BLL.Services
 
         public async Task<UserDTO> GetUserByIdAsync(int id)
         {
-            var user = (await _userRepository.GetAllUserAsync()).FirstOrDefault(u => u.id == id);
-            if (user == null) return null;
+            User? user = (await _userRepository.GetAllUserAsync()).FirstOrDefault(u => u.id == id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
             return new UserDTO
             {
                 Id = user.id,
@@ -32,7 +38,8 @@ namespace SonitCustom.BLL.Services
 
         public async Task<List<UserDTO>> GetAllUsersAsync()
         {
-            var users = await _userRepository.GetAllUserAsync();
+            List<User> users = await _userRepository.GetAllUserAsync();
+
             return users.Select(user => new UserDTO
             {
                 Id = user.id,
