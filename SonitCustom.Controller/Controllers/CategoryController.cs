@@ -21,12 +21,7 @@ namespace SonitCustom.Controller.Controllers
         public async Task<IActionResult> GetAllCategories()
         {
             try
-            {
-                if (!JwtCookieHelper.IsAdmin(Request))
-                {
-                    return Unauthorized(new { message = "Chỉ admin mới có quyền truy cập" });
-                }
-
+            { 
                 List<CategoryDTO> categories = await _categoryService.GetAllCategoriesAsync();
                 return Ok(categories);
             }

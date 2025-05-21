@@ -1,4 +1,4 @@
-using SonitCustom.BLL.DTOs;
+﻿using SonitCustom.BLL.DTOs;
 using SonitCustom.BLL.Interface;
 using SonitCustom.DAL.Entities;
 using SonitCustom.DAL.Interface;
@@ -44,24 +44,33 @@ namespace SonitCustom.BLL.Services
             }
         }
 
-        //// Get product by ID
-        //public async Task<ProductDTO> GetProductByIdAsync(string id)
-        //{
-        //    try
-        //    {
-        //        var product = await _productRepository.GetProductByIdAsync(id);
-        //        if (product == null)
-        //        {
-        //            throw new Exception($"Product with ID {id} not found");
-        //        }
-        //        return product;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log error here
-        //        throw new Exception($"Error occurred while fetching product with ID {id}", ex);
-        //    }
-        //}
+        // Get product by ID
+        public async Task<ProductDTO> GetProductByIdAsync(string id)
+        {
+            try
+            {
+                Product product = await _productRepository.GetProductByIdAsync(id);
+                if (product == null)
+                {
+                    throw new Exception($"Product {id} không tồn tại");
+                }
+
+                return new ProductDTO()
+                {
+                    ProId = product.ProId,
+                    ProName = product.ProName,
+                    Description = product.Description,
+                    Price = product.Price,
+                    ImgUrl = product.ImgUrl,
+                    Category = product.CategoryNavigation.CateName
+                };
+            }
+            catch (Exception ex)
+            {
+                // Log error here
+                throw new Exception($"Error occurred while fetching product with ID {id}", ex);
+            }
+        }
 
         // Create new product
         public async Task<bool> CreateProductAsync(CreateProductDTO product)
@@ -71,12 +80,6 @@ namespace SonitCustom.BLL.Services
                 if (product == null)
                 {
                     throw new ArgumentNullException(nameof(product));
-                }
-
-                // Add any business logic validation here
-                if (string.IsNullOrEmpty(product.ProName))
-                {
-                    throw new Exception("Product name is required");
                 }
 
                 var proId = await GenerateProductId(product.Category);
@@ -110,57 +113,56 @@ namespace SonitCustom.BLL.Services
             return $"{prefix}{(numberOfProducts + 1):D3}";
         }
 
-        //// Update existing product
-        //public async Task<ProductDTO> UpdateProductAsync(ProductDTO product)
-        //{
-        //    try
-        //    {
-        //        if (product == null)
-        //        {
-        //            throw new ArgumentNullException(nameof(product));
-        //        }
+        // Update existing product
+        public async Task<Product> UpdateProductAsync(string id, UpdateProductDTO product)
+        {
+            try
+            {
+                if (product == null)
+                {
+                    throw new ArgumentNullException(nameof(product));
+                }
 
-        //        // Check if product exists
-        //        var exists = await _productRepository.ProductExistsAsync(product.ProId);
-        //        if (!exists)
-        //        {
-        //            throw new Exception($"Product with ID {product.ProId} not found");
-        //        }
+                // Check if product exists
+                Product existProduct = await _productRepository.GetProductByIdAsync(id);
+                if (existProduct == null)
+                {
+                    throw new Exception($"Product {id} không tồn tại");
+                }
 
-        //        // Add any business logic validation here
-        //        if (string.IsNullOrEmpty(product.ProName))
-        //        {
-        //            throw new Exception("Product name is required");
-        //        }
+                existProduct.ProName = string.IsNullOrEmpty(product.ProName) ? existProduct.ProName : product.ProName;
+                existProduct.Description = string.IsNullOrEmpty(product.Description) ? existProduct.Description : product.Description;
+                existProduct.ImgUrl = string.IsNullOrEmpty(product.ImgUrl) ? existProduct.ImgUrl : product.ImgUrl;
+                existProduct.Price = string.IsNullOrEmpty(product.Price) ? existProduct.Price : product.Price;
 
-        //        return await _productRepository.UpdateProductAsync(product);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log error here
-        //        throw new Exception($"Error occurred while updating product with ID {product?.ProId}", ex);
-        //    }
-        //}
+                return await _productRepository.UpdateProductAsync(existProduct);
+            }
+            catch (Exception ex)
+            {
+                // Log error here
+                throw new Exception($"Error occurred while updating product with ID {id}", ex);
+            }
+        }
 
-        //// Delete product
-        //public async Task<bool> DeleteProductAsync(string id)
-        //{
-        //    try
-        //    {
-        //        // Check if product exists
-        //        var exists = await _productRepository.ProductExistsAsync(id);
-        //        if (!exists)
-        //        {
-        //            throw new Exception($"Product with ID {id} not found");
-        //        }
+        // Delete product
+        public async Task<bool> DeleteProductAsync(string id)
+        {
+            try
+            {
+                // Check if product exists
+                Product existProduct = await _productRepository.GetProductByIdAsync(id);
+                if (existProduct == null)
+                {
+                    throw new Exception($"Product with ID {id} not found");
+                }
 
-        //        return await _productRepository.DeleteProductAsync(id);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log error here
-        //        throw new Exception($"Error occurred while deleting product with ID {id}", ex);
-        //    }
-        //}
+                return await _productRepository.DeleteProductAsync(id);
+            }
+            catch (Exception ex)
+            {
+                // Log error here
+                throw new Exception($"Error occurred while deleting product with ID {id}", ex);
+            }
+        }
     }
-} 
+}
