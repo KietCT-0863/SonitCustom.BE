@@ -40,5 +40,14 @@ namespace SonitCustom.DAL.Repositories
                 .Include(u => u.roleNavigation)
                 .FirstOrDefaultAsync(u => u.username == username && u.password == password);
         }
+
+        public async Task<string?> GetRoleByUserIdAsync(int userId)
+        {
+            User? user = await _context.Users
+                .Include(u => u.roleNavigation)
+                .FirstOrDefaultAsync(u => u.id == userId);
+            
+            return user?.roleNavigation?.roleName;
+        }
     }
 }

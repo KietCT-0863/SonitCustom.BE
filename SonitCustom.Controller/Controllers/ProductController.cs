@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SonitCustom.BLL.DTOs;
 using SonitCustom.BLL.Interface;
-using SonitCustom.BLL.Services;
 using SonitCustom.Controller.Helpers;
-using SonitCustom.DAL.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,24 +11,25 @@ namespace SonitCustom.Controller.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly ITokenService _tokenService;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, ITokenService tokenService)
         {
             _productService = productService;
+            _tokenService = tokenService;
         }
 
         // GET: api/Product
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult> GetProducts()
         {
             try
             {
                 List<ProductDTO> products = await _productService.GetAllProductsAsync();
-
                 return Ok(products);
             }
             catch (Exception ex)
@@ -60,23 +59,23 @@ namespace SonitCustom.Controller.Controllers
 
         // POST: api/Product
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<ProductDTO>> CreateProduct(CreateProductDTO product)
         {
             try
             {
-                if (!JwtCookieHelper.IsAdmin(Request))
-                {
-                    return Unauthorized(new { message = "Chỉ admin mới có quyền truy cập" });
-                }
-
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
 
+                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
                 await _productService.CreateProductAsync(product);
-
                 return Ok(new { message = "Thêm sản phẩm thành công" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -86,23 +85,23 @@ namespace SonitCustom.Controller.Controllers
 
         // PUT: api/Product/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateProduct(string id, UpdateProductDTO product)
         {
             try
             {
-                if (!JwtCookieHelper.IsAdmin(Request))
-                {
-                    return Unauthorized(new { message = "Chỉ admin mới có quyền truy cập" });
-                }
-
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
 
-                bool updatedProduct = await _productService.UpdateProductAsync(id, product);
-
+                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
+                await _productService.UpdateProductAsync(id, product);
                 return Ok(new { message = "Chỉnh sửa sản phẩm thành công" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -112,23 +111,23 @@ namespace SonitCustom.Controller.Controllers
 
         // DELETE: api/Product/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteProduct(string id)
         {
             try
             {
-                if (!JwtCookieHelper.IsAdmin(Request))
-                {
-                    return Unauthorized(new { message = "Chỉ admin mới có quyền truy cập" });
-                }
-
-                var result = await _productService.DeleteProductAsync(id);
-
+                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
+                bool result = await _productService.DeleteProductAsync(id);
                 if (!result)
                 {
-                    return NotFound($"Product with ID {id} not found");
+                    return NotFound($"Không tìm thấy sản phẩm có mã {id}");
                 }
 
                 return Ok(new { message = "Đã xoá sản phẩm thành công" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
             }
             catch (Exception ex)
             {

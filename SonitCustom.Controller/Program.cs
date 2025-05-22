@@ -20,7 +20,7 @@ namespace SonitCustom.Controller
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
             // Add CORS
             builder.Services.AddCors(options =>
@@ -28,25 +28,20 @@ namespace SonitCustom.Controller
                 options.AddPolicy("AllowAll",
                     builder =>
                     {
-                        builder.WithOrigins(
-                            "http://localhost:3000",
-                            "http://localhost:5173",
-                            "https://sonit-custom.vercel.app"
-                        )
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials();
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
                     });
             });
-
-            // Add configuration from environment variables
-            //builder.Configuration.AddEnvironmentVariables();
 
             // Add services to the container.
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            // Add Memory Cache
+            builder.Services.AddMemoryCache();
 
             builder.Services.AddDbContext<SonitCustomDBContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -60,7 +55,9 @@ namespace SonitCustom.Controller
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
 
-            var jwtSettings = builder.Configuration.GetSection("Jwt");
+            builder.Services.AddScoped<ITokenService, TokenService>();
+
+            // Cấu hình Authentication
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -70,34 +67,40 @@ namespace SonitCustom.Controller
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings["Issuer"],
-                    ValidAudience = jwtSettings["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:AccessTokenSecret"])),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
                 };
 
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
-                        if (context.Request.Cookies.ContainsKey("jwt_token"))
-                        {
-                            context.Token = context.Request.Cookies["jwt_token"];
-                        }
+                        // Lấy token từ cookie
+                        context.Token = context.Request.Cookies["access_token"];
                         return Task.CompletedTask;
                     }
                 };
             });
 
-            var app = builder.Build();
+            // Cấu hình Authorization
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdminRole", policy =>
+                    policy.RequireRole("admin"));
+            });
+
+            WebApplication app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            // Enable Swagger in both Development and Production
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
 
             app.UseHttpsRedirection();
 

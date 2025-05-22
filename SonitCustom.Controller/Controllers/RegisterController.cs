@@ -28,7 +28,6 @@ namespace SonitCustom.Controller.Controllers
                 }
 
                 bool createdUser = await _registerService.RegisterAsync(newRegister);
-
                 if (createdUser == null)
                 {
                     return BadRequest(new { message = "Đăng ký thất bại" });

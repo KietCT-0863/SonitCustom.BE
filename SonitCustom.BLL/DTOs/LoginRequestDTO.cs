@@ -2,7 +2,7 @@
 
 namespace SonitCustom.BLL.DTOs
 {
-    public class LoginDTO
+    public class LoginRequestDTO
     {
         [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
         public string Username { get; set; }

@@ -13,39 +13,51 @@ namespace SonitCustom.Controller.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ILoginService _loginService;
+        private readonly ITokenService _tokenService;
+        private readonly IUserService _userService;
 
-        public AuthController(ILoginService loginService)
+        public AuthController(ILoginService loginService, ITokenService tokenService, IUserService userService)
         {
             _loginService = loginService;
+            _tokenService = tokenService;
+            _userService = userService;
         }
 
         [HttpPost("login")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginDTO loginModel)
+        public async Task<IActionResult> Login(LoginRequestDTO request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }    
-
-            // Xóa cookie cũ nếu có
-            Response.Cookies.Delete("jwt_token");
-
-            UserDTO user = await _loginService.LoginAsync(loginModel.Username, loginModel.Password);
+            UserDTO? user = await _loginService.LoginAsync(request.Username, request.Password);
 
             if (user == null)
             {
-                return Unauthorized(new { message = "Tên đăng nhập hoặc mật khẩu không hợp lệ" });
+                return Unauthorized(new { message = "Tên đăng nhập hoặc mật khẩu không đúng" });
             }    
 
-            // Sinh JWT token
-            var token = await _loginService.GenerateJwtTokenAsync(user);
+            AccessTokenDTO accessToken = _tokenService.GenerateAccessToken(user.Id, user.RoleName);
+            RefreshTokenDTO refreshToken = _tokenService.GenerateRefreshToken(user.Id);
 
-            // Đặt token vào cookie
-            JwtCookieHelper.SetJwtCookie(Response, token);
+            CookieHelper.SetAccessTokenCookie(Response, accessToken);
+            CookieHelper.SetRefreshTokenCookie(Response, refreshToken);
 
-            // Trả về message thành công, không trả về user, không trả về token
-            return Ok(new { message ="Đăng nhập thành công" });
+            return Ok(new { 
+                message = "Đăng nhập thành công",
+            });
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            string? refreshToken = CookieHelper.GetRefreshToken(Request);
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                await _tokenService.RevokeRefreshTokenAsync(refreshToken);
+            }
+
+            CookieHelper.RemoveAllAuthCookies(Response);
+
+            return Ok(new { 
+                message = "Đăng xuất thành công" 
+            });
         }
     }
 } 

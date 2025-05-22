@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using SonitCustom.BLL.Interface;
 using System.Threading.Tasks;
+using SonitCustom.BLL.Interface;
+using SonitCustom.BLL.DTOs;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 using SonitCustom.Controller.Helpers;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 
 namespace SonitCustom.Controller.Controllers
 {
@@ -12,37 +13,57 @@ namespace SonitCustom.Controller.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly ITokenService _tokenService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, ITokenService tokenService)
         {
             _userService = userService;
+            _tokenService = tokenService;
         }
 
-        // GET: api/user
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAllUsers()
         {
-            if (!JwtCookieHelper.IsAdmin(Request))
-                return Unauthorized(new { message = "Chỉ admin mới có quyền truy cập" });
-
-            var users = await _userService.GetAllUsersAsync();
-            return Ok(users);
+            try
+            {
+                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
+                List<UserDTO> users = await _userService.GetAllUsersAsync();
+                return Ok(users);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Đã xảy ra lỗi khi lấy danh sách người dùng" });
+            }
         }
 
-        // GET: api/user/me
         [HttpGet("me")]
+        [Authorize]
         public async Task<IActionResult> GetMe()
         {
-            var userInfo = JwtCookieHelper.GetUserInfoFromCookie(Request);
-            if (userInfo == null)
-                return Unauthorized();
+            string? accessToken = CookieHelper.GetAccessToken(Request);
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return Unauthorized(new { message = "Phiên đăng nhập không hợp lệ" });
+            }
 
-            var (userId, _) = userInfo.Value;
-            var user = await _userService.GetUserByIdAsync(userId ?? -1);
+            int userId = int.Parse(User.FindFirst("userid")?.Value ?? "0");
+            if (userId == 0)
+            {
+                return Unauthorized(new { message = "Token không hợp lệ" });
+            }
 
+            UserDTO? user = await _userService.GetUserByIdAsync(userId);
             if (user == null)
+            {
                 return NotFound(new { message = "Không tìm thấy người dùng" });
+            }
+
             return Ok(user);
         }
     }
-} 
+}

@@ -49,5 +49,10 @@ namespace SonitCustom.BLL.Services
                 RoleName = user.roleNavigation?.roleName
             }).ToList();
         }
+
+        public async Task<string?> GetUserRoleAsync(int userId)
+        {
+            return await _userRepository.GetRoleByUserIdAsync(userId);
+        }
     }
 } 

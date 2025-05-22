@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using SonitCustom.BLL.DTOs;
 using SonitCustom.BLL.Interface;
-using SonitCustom.Controller.Helpers;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using SonitCustom.Controller.Helpers;
+using Microsoft.AspNetCore.Authorization;
+using SonitCustom.BLL.Services;
 
 namespace SonitCustom.Controller.Controllers
 {
@@ -11,45 +14,47 @@ namespace SonitCustom.Controller.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
+        private readonly ITokenService _tokenService;
 
-        public CategoryController(ICategoryService categoryService)
+        public CategoryController(ICategoryService categoryService, ITokenService tokenService)
         {
             _categoryService = categoryService;
+            _tokenService = tokenService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllCategories()
         {
             try
-            { 
+            {
                 List<CategoryDTO> categories = await _categoryService.GetAllCategoriesAsync();
-
                 return Ok(categories);
             }
             catch (System.Exception ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                return BadRequest(new { message = ex.Message });
             }
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> CreateCategory([FromBody] string categoryName)
         {
             try
             {
-                if (!JwtCookieHelper.IsAdmin(Request))
-                {
-                    return Unauthorized(new { message = "Chỉ admin mới có quyền truy cập" });
-                }
-
+                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
                 bool result = await _categoryService.CreateCategoryAsync(categoryName);
-
-                return Ok("Tạo category thành công");
+                return Ok(new { message = "Tạo category thành công" });
             }
-            catch (System.Exception ex)
+            catch (UnauthorizedAccessException ex)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Lỗi khi tạo category: {ex.Message}" });
             }
         }
+
     }
 }
