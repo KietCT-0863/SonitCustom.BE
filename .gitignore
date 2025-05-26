@@ -2,7 +2,8 @@
 # Environment files
 # ====================
 .env
-.env.*
+.env.local
+.env.*.local
 
 # ====================
 # App Settings
@@ -38,8 +39,10 @@ nupkg/
 # ====================
 # Build results
 # ====================
-[Dd]ebug*/
-[Rr]elease*/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
 x64/
 x86/
 build/
@@ -82,6 +85,7 @@ yarn-error.log*
 # Rider IDE
 # ====================
 .idea/
+*.sln.iml
 
 # ====================
 # Swap / temp

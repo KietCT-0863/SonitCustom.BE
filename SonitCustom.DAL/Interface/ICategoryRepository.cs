@@ -11,5 +11,8 @@ namespace SonitCustom.DAL.Interface
         Task<Category> CreateCategoryAsync(Category category);
         Task<string> GetPrefixFromCategoryName(string categoryName);
         Task<bool> CheckPrefixExistsAsync(string prefix);
+        Task UpdateCategoryAsync(Category category);
+        Task DeleteCategoryAsync(int categoryId);
+
     }
-} 
+}

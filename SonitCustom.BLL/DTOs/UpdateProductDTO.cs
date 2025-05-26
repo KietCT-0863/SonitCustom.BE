@@ -18,5 +18,7 @@ namespace SonitCustom.BLL.DTOs
 
         [RegularExpression(@"^\d+$", ErrorMessage = "Giá chỉ được chứa số")]
         public string Price { get; set; }
+
+        public string Category { get; set; }
     }
 }

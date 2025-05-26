@@ -50,5 +50,17 @@ namespace SonitCustom.DAL.Repositories
             return await _context.Categories
                 .AnyAsync(c => c.Prefix.ToLower() == prefix.ToLower());
         }
+
+        public async Task UpdateCategoryAsync(Category category)
+        {
+            await UpdateCategoryAsync(category);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteCategoryAsync(int categoryId)
+        {
+            await DeleteCategoryAsync(categoryId);
+            await _context.SaveChangesAsync();
+        }
     }
 } 
