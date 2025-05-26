@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SonitCustom.BLL.DTOs;
+using SonitCustom.BLL.Exceptions;
 using SonitCustom.BLL.Interface;
 using SonitCustom.Controller.Helpers;
 using System;
@@ -102,6 +103,10 @@ namespace SonitCustom.Controller.Controllers
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(new { message = ex.Message });
+            }
+            catch (ProductNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {

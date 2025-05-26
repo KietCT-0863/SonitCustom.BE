@@ -2,6 +2,7 @@
 using SonitCustom.BLL.Interface;
 using SonitCustom.DAL.Entities;
 using SonitCustom.DAL.Interface;
+using SonitCustom.BLL.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -49,7 +50,7 @@ namespace SonitCustom.BLL.Services
                 Product product = await _productRepository.GetProductByIdAsync(id);
                 if (product == null)
                 {
-                    throw new Exception($"Product {id} không tồn tại");
+                    throw new ProductNotFoundException(id);
                 }
 
                 return new ProductDTO()
@@ -118,21 +119,72 @@ namespace SonitCustom.BLL.Services
                 Product existProduct = await _productRepository.GetProductByIdAsync(id);
                 if (existProduct == null)
                 {
-                    throw new Exception($"Product {id} không tồn tại");
+                    throw new ProductNotFoundException(id);
                 }
 
-                existProduct.ProName = string.IsNullOrEmpty(product.ProName) ? existProduct.ProName : product.ProName;
-                existProduct.Description = string.IsNullOrEmpty(product.Description) ? existProduct.Description : product.Description;
-                existProduct.ImgUrl = string.IsNullOrEmpty(product.ImgUrl) ? existProduct.ImgUrl : product.ImgUrl;
-                existProduct.Price = string.IsNullOrEmpty(product.Price) ? existProduct.Price : product.Price;
+                if (!string.IsNullOrEmpty(product.Category))
+                {
+                    await UpdateProductHaveCategoryAsync(existProduct, product);
 
-                await _productRepository.UpdateProductAsync(existProduct);
+                    // SAU NÀY KHI MỞ RỘNG PROJECT, KHI GỌI HÀM UPDATE MÀ XẢY RA SỰ THAY ĐỔI ID CỦA PRODUCT, THÌ PHẢI ĐỒNG BỘ LẠI ID CỦA PRODUCT ĐÓ Ở NHỮNG TABLE KHÁC ĐỂ TRÁNH VIỆC XUNG ĐỘT DỮ LIỆU
+                    // *** RẤT QUAN TRỌNG ***
+                }
+                else
+                {
+                    await UpdateProductHaveNoOrSameCategoryAsync(existProduct, product);
+                }
+
                 return true;
+            }
+            catch (ProductNotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error occurred while updating product with ID {id}", ex);
             }
+        }
+
+        private async Task UpdateProductHaveCategoryAsync(Product existProduct, UpdateProductDTO product)
+        {
+            if (string.IsNullOrEmpty(product.Category))
+            {
+                return;
+            }
+
+            int newCategoryId = await _categoryRepository.GetCategoryIdByNameAsync(product.Category);
+            
+            if (existProduct.Category == newCategoryId)
+            {
+                await UpdateProductHaveNoOrSameCategoryAsync(existProduct, product);
+                return;
+            }
+
+            string newId = await GenerateProductId(product.Category);
+
+            Product newProduct = new Product
+            {
+                ProId = newId,
+                ProName = !string.IsNullOrEmpty(product.ProName) ? product.ProName : existProduct.ProName,
+                Description = !string.IsNullOrEmpty(product.Description) ? product.Description : existProduct.Description,
+                Price = !string.IsNullOrEmpty(product.Price) ? product.Price : existProduct.Price,
+                ImgUrl = !string.IsNullOrEmpty(product.ImgUrl) ? product.ImgUrl : existProduct.ImgUrl,
+                Category = newCategoryId
+            };
+
+            await _productRepository.DeleteProductAsync(existProduct);
+            await _productRepository.CreateProductAsync(newProduct);
+        }
+         
+        private async Task UpdateProductHaveNoOrSameCategoryAsync(Product existProduct, UpdateProductDTO product)
+        {
+            existProduct.ProName = !string.IsNullOrEmpty(product.ProName) ? product.ProName : existProduct.ProName;
+            existProduct.Description = !string.IsNullOrEmpty(product.Description) ? product.Description : existProduct.Description;
+            existProduct.ImgUrl = !string.IsNullOrEmpty(product.ImgUrl) ? product.ImgUrl : existProduct.ImgUrl;
+            existProduct.Price = !string.IsNullOrEmpty(product.Price) ? product.Price : existProduct.Price;
+
+            await _productRepository.UpdateProductAsync(existProduct);
         }
 
         public async Task<bool> DeleteProductAsync(string id)
@@ -143,7 +195,7 @@ namespace SonitCustom.BLL.Services
 
                 if (existProduct == null)
                 {
-                    throw new Exception($"Product with ID {id} not found");
+                    throw new ProductNotFoundException(id);
                 }
 
                 await _productRepository.DeleteProductAsync(existProduct);

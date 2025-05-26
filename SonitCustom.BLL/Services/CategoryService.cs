@@ -63,6 +63,5 @@ namespace SonitCustom.BLL.Services
             
             return prefixExists ? "sonit" : newPrefix;
         }
-
     }
 }
