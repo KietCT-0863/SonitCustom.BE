@@ -9,6 +9,5 @@ namespace SonitCustom.BLL.Interface
     {
         Task<bool> CreateCategoryAsync(string categoryName);
         Task<List<CategoryDTO>> GetAllCategoriesAsync();
-        Task<bool> UpdateCategoryAsync();
     }
 } 
