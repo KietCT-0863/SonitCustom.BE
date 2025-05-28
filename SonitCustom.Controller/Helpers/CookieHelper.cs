@@ -18,7 +18,7 @@ namespace SonitCustom.Controller.Helpers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict, // Nếu dùng nhiều domain, đổi thành SameSiteMode.None
+                SameSite = SameSiteMode.None,
                 Expires = expires,
                 Path = "/"
             };

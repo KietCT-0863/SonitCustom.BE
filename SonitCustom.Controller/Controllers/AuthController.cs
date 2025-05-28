@@ -41,7 +41,7 @@ namespace SonitCustom.Controller.Controllers
 
             return Ok(new
             {
-                message = "Đăng nhập thành công",
+                message = "Đăng nhập thành công"
             });
         }
 
