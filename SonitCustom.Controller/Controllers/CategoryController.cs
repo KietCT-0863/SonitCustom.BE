@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SonitCustom.BLL.DTOs;
 using SonitCustom.BLL.Interface;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using SonitCustom.Controller.Helpers;
 using Microsoft.AspNetCore.Authorization;
-using SonitCustom.BLL.Services;
 using SonitCustom.BLL.Exceptions;
 
 namespace SonitCustom.Controller.Controllers

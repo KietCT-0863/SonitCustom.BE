@@ -1,12 +1,5 @@
-﻿using SonitCustom.BLL.DTOs;
-using SonitCustom.BLL.Interface;
-using SonitCustom.DAL.Entities;
+﻿using SonitCustom.BLL.Interface;
 using SonitCustom.DAL.Interface;
-using SonitCustom.BLL.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
 
 namespace SonitCustom.BLL.Services
 {

@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using SonitCustom.BLL.DTOs;
 using SonitCustom.BLL.Interface;
 using SonitCustom.DAL.Entities;

@@ -1,5 +1,3 @@
-using System;
-
 namespace SonitCustom.BLL.Exceptions
 {
     public class CategoryNotFoundException : Exception

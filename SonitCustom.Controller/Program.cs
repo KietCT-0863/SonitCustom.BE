@@ -6,12 +6,6 @@ using SonitCustom.BLL.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.Extensions.Configuration;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using SonitCustom.BLL.DTOs;
 using SonitCustom.DAL.Interface;
 
 namespace SonitCustom.Controller

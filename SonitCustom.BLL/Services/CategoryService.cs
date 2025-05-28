@@ -1,15 +1,8 @@
 ﻿using SonitCustom.BLL.Interface;
 using SonitCustom.DAL.Entities;
 using SonitCustom.DAL.Interface;
-using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using SonitCustom.BLL.DTOs;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using SonitCustom.BLL.Exceptions;
-using System;
-using System.Security;
 
 namespace SonitCustom.BLL.Services
 {
@@ -140,7 +133,7 @@ namespace SonitCustom.BLL.Services
                 throw new CategoryNotFoundException(cateId);
             }
 
-            await _categoryRepository.DeleteCategoryAsync(cateId);
+            await _categoryRepository.DeleteCategoryAsync(currentCate);
         }
     }
 }

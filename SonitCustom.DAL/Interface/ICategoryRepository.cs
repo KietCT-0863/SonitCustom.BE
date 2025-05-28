@@ -1,6 +1,4 @@
 using SonitCustom.DAL.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace SonitCustom.DAL.Interface
 {
@@ -13,7 +11,7 @@ namespace SonitCustom.DAL.Interface
         Task UpdateCategoryAsync(Category category);
         Task<Category?> GetCategoryByIdAsync(int id);
         Task<bool> IsCategoryExistAsync(string cateName);
-        Task DeleteCategoryAsync(int categoryId);
+        Task DeleteCategoryAsync(Category category);
         //Task<int> GetCategoryIdByNameAsync(string cateName);
 
         //Task<string> GetPrefixFromCategoryName(string categoryName);

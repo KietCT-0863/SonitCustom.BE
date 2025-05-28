@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SonitCustom.BLL.Interface;
 using SonitCustom.BLL.DTOs;
-using SonitCustom.DAL.Entities;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using SonitCustom.Controller.Helpers;
 
 namespace SonitCustom.Controller.Controllers

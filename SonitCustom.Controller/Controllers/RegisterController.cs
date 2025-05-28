@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using SonitCustom.BLL.Interface;
-using SonitCustom.DAL.Entities;
-using System.Threading.Tasks;
 using SonitCustom.BLL.DTOs;
 
 namespace SonitCustom.Controller.Controllers

@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using SonitCustom.BLL.Interface;
 using SonitCustom.DAL.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using SonitCustom.DAL.Entities;
 using SonitCustom.BLL.DTOs;
+
 namespace SonitCustom.BLL.Services
 {
     public class LoginService : ILoginService

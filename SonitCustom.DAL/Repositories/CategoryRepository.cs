@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SonitCustom.DAL.Entities;
 using SonitCustom.DAL.Interface;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace SonitCustom.DAL.Repositories
 {
@@ -55,22 +52,10 @@ namespace SonitCustom.DAL.Repositories
                 .AnyAsync(c => c.CateName.ToLower() == cateName.ToLower());
         }
 
-        public async Task DeleteCategoryAsync(int categoryId)
+        public async Task DeleteCategoryAsync(Category category)
         {
-            var category = await _context.Categories.FindAsync(categoryId);
-            if (category != null)
-            {
-                _context.Categories.Remove(category);
-                await _context.SaveChangesAsync();
-                
-                // Reset identity sau khi xóa
-                await ResetCategoryIdentityAsync();
-            }
-        }
-
-        private async Task ResetCategoryIdentityAsync()
-        {
-            await _context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT('Categories', RESEED, (SELECT ISNULL(MAX(CateId), 0) FROM Categories))");
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
         }
 
         //public async Task<string> GetPrefixFromCategoryName(string categoryName)

@@ -1,10 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using SonitCustom.DAL.Entities;
 using SonitCustom.DAL.Interface;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
 
 namespace SonitCustom.DAL.Repositories
 {

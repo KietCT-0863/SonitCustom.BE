@@ -1,7 +1,3 @@
-using SonitCustom.BLL.DTOs;
-using SonitCustom.DAL.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace SonitCustom.BLL.Interface
 {
