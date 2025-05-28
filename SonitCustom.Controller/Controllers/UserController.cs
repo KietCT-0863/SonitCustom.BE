@@ -31,9 +31,9 @@ namespace SonitCustom.Controller.Controllers
                 List<UserDTO> users = await _userService.GetAllUsersAsync();
                 return Ok(users);
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
-                return Unauthorized(new { message = ex.Message });
+                return Unauthorized(new { message = "Bạn không có quyền sử dụng API này" });
             }
             catch (Exception)
             {

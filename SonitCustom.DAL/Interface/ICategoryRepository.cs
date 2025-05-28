@@ -6,14 +6,17 @@ namespace SonitCustom.DAL.Interface
 {
     public interface ICategoryRepository
     {
-        //Task<bool> IsCategoryExistAsync(string cateName);
+        Task<List<Category>> GetAllCategoriesAsync();
+        Task CreateCategoryAsync(Category category);
+        Task<Category?> GetCategoryByNameAsync(string cateName);
+        Task<bool> CheckPrefixExistsAsync(string prefix);
+        Task UpdateCategoryAsync(Category category);
+        Task<Category?> GetCategoryByIdAsync(int id);
+        Task<bool> IsCategoryExistAsync(string cateName);
+        Task DeleteCategoryAsync(int categoryId);
         //Task<int> GetCategoryIdByNameAsync(string cateName);
-        //Task<Category?> GetCategoryByIdAsync(int id);
-        //Task<List<Category>> GetAllCategoriesAsync();
-        //Task<Category> CreateCategoryAsync(Category category);
+
         //Task<string> GetPrefixFromCategoryName(string categoryName);
-        //Task<bool> CheckPrefixExistsAsync(string prefix);
-        //Task UpdateCategoryAsync(Category category);
-        //Task DeleteCategoryAsync(int categoryId);
+
     }
 }

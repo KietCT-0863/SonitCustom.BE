@@ -7,122 +7,140 @@ using Microsoft.EntityFrameworkCore;
 using SonitCustom.BLL.DTOs;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using SonitCustom.BLL.Exceptions;
+using System;
+using System.Security;
 
 namespace SonitCustom.BLL.Services
 {
     public class CategoryService : ICategoryService
     {
-        //private readonly ICategoryRepository _categoryRepository;
-        //private readonly IProductRepository _productRepository;
-        //private readonly IProductService _productService;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IProductService _productService;
 
-        //public CategoryService(ICategoryRepository categoryRepository, IProductRepository productRepository, IProductService productService)
-        //{
-        //    _categoryRepository = categoryRepository;
-        //    _productRepository = productRepository;
-        //    _productService = productService;
-        //}
+        public CategoryService(ICategoryRepository categoryRepository, IProductRepository productRepository, IProductService productService)
+        {
+            _categoryRepository = categoryRepository;
+            _productRepository = productRepository;
+            _productService = productService;
+        }
 
-        //public async Task<bool> CreateCategoryAsync(string categoryName)
-        //{
-        //    string newPrefix = await GeneratePrefixFromCategory(categoryName);
+        public async Task<List<CategoryDTO>> GetAllCategoriesAsync()
+        {
+            List<Category> categories = await _categoryRepository.GetAllCategoriesAsync();
 
-        //    Category category = new()
-        //    {
-        //        CateName = categoryName,
-        //        Prefix = newPrefix
-        //    };
+            return categories.Select(c => new CategoryDTO
+            {
+                CateId = c.CateId,
+                CateName = c.CateName,
+                Prefix = c.Prefix
+            }).ToList();
+        }
 
-        //    await _categoryRepository.CreateCategoryAsync(category);
+        public async Task CreateCategoryAsync(string cateName)
+        {
+            Category? existCategory = await _categoryRepository.GetCategoryByNameAsync(cateName);
 
-        //    return true;
-        //}
+            if (existCategory!=null)
+            {
+                throw new CategoryNameExistException(cateName);
+            }
 
-        //public async Task<List<CategoryDTO>> GetAllCategoriesAsync()
-        //{
-        //    List<Category> categories = await _categoryRepository.GetAllCategoriesAsync();
+            string newPrefix = await GeneratePrefixFromCategory(cateName);
 
-        //    return categories.Select(c => new CategoryDTO
-        //    {
-        //        CateId = c.CateId,
-        //        CateName = c.CateName,
-        //        Prefix = c.Prefix
-        //    }).ToList();
-        //}
+            Category category = new()
+            {
+                CateName = cateName,
+                Prefix = newPrefix
+            };
 
-        //private async Task<string> GeneratePrefixFromCategory(string category)
-        //{
-        //    string[] words = category.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        //    string newPrefix;
+            await _categoryRepository.CreateCategoryAsync(category);
+        }
 
-        //    if (words.Length == 1)
-        //    {
-        //        newPrefix = words[0].Length >= 3 ? words[0].Substring(0, 3) : words[0].PadRight(3, 'x');
-        //    }
-        //    else
-        //    {
-        //        newPrefix = string.Join("", words.Select(w => w[0]));
-        //    }
+        private async Task<string> GeneratePrefixFromCategory(string category)
+        {
+            string[] words = category.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string newPrefix;
 
-        //    bool prefixExists = await _categoryRepository.CheckPrefixExistsAsync(newPrefix);
+            if (words.Length == 1)
+            {
+                newPrefix = words[0].Length >= 3 ? words[0].Substring(0, 3) : words[0].PadRight(3, 'x');
+            }
+            else
+            {
+                newPrefix = string.Join("", words.Select(w => w[0]));
+            }
 
-        //    return prefixExists ? "sonit" : newPrefix;
-        //}
+            bool prefixExists = await _categoryRepository.CheckPrefixExistsAsync(newPrefix);
 
-        //public async Task UpdateCategoryAsync(int cateId, UpdateCategoryDTO categoryDTO)
-        //{
-        //    Category? currentCate = await _categoryRepository.GetCategoryByIdAsync(cateId);
+            return prefixExists ? "sonit" : newPrefix;
+        }
 
-        //    if (currentCate == null)
-        //    {
-        //        // nếu không tìm thấy thì throw ra exception
-        //        throw new Exception();
-        //    }
+        public async Task UpdateCategoryAsync(int cateId, UpdateCategoryDTO categoryDTO)
+        {
+            Category? currentCate = await _categoryRepository.GetCategoryByIdAsync(cateId);
 
-        //    if (!string.IsNullOrEmpty(categoryDTO.CateName) && await _categoryRepository.IsCategoryExistAsync(categoryDTO.CateName))
-        //    {
-        //        throw new Exception();
-        //    }
+            if (currentCate == null)
+            {
+                throw new CategoryNotFoundException(cateId);
+            }
 
-        //    if (await _categoryRepository.CheckPrefixExistsAsync(categoryDTO.Prefix))
-        //    {
-        //        throw new Exception();
-        //    }
+            if (!string.IsNullOrEmpty(categoryDTO.CateName) && await _categoryRepository.IsCategoryExistAsync(categoryDTO.CateName))
+            {
+                throw new CategoryNameExistException(categoryDTO.CateName);
+            }
 
-        //    if (string.IsNullOrEmpty(categoryDTO.Prefix))
-        //    {
-        //        currentCate.CateName = categoryDTO.CateName;
-        //        currentCate.Prefix = await GeneratePrefixFromCategory(categoryDTO.CateName);
-        //    }
-        //    else
-        //    {
-        //        currentCate.CateName = string.IsNullOrEmpty(categoryDTO.CateName) ? currentCate.CateName : categoryDTO.CateName;
-        //        currentCate.Prefix = categoryDTO.Prefix;
-        //    }
+            if (await _categoryRepository.CheckPrefixExistsAsync(categoryDTO.Prefix))
+            {
+                throw new CategoryPrefixExistException(categoryDTO.Prefix);
+            }
 
-        //    await _categoryRepository.UpdateCategoryAsync(currentCate);
+            if (string.IsNullOrEmpty(categoryDTO.Prefix))
+            {
+                currentCate.CateName = categoryDTO.CateName;
+                currentCate.Prefix = await GeneratePrefixFromCategory(categoryDTO.CateName);
+            }
+            else
+            {
+                currentCate.CateName = string.IsNullOrEmpty(categoryDTO.CateName) ? currentCate.CateName : categoryDTO.CateName;
+                currentCate.Prefix = categoryDTO.Prefix;
+            }
 
-        //    // Lấy danh sách tất cả sản phẩm thuộc category này
-        //    List<Product> products = await _productRepository.GetAllProductOfCategoryAsync(cateId);
+            await _categoryRepository.UpdateCategoryAsync(currentCate);
 
-        //    if (products == null)
-        //    {
-        //        return;
-        //    }
+            //// Lấy danh sách tất cả sản phẩm thuộc category này
+            //List<Product> products = await _productRepository.GetAllProductOfCategoryAsync(cateId);
 
-        //    foreach (Product product in products)
-        //    {
-        //        UpdateProductDTO updateProduct = new()
-        //        {
-        //            ProName = product.ProName,
-        //            Description = product.Description,
-        //            ImgUrl = product.ImgUrl,
-        //            Price = product.Price,
-        //            Category = currentCate.CateName
-        //        };
+            //if (products == null)
+            //{
+            //    return;
+            //}
 
-        //        await _productService.UpdateProductAsync(product.Id, updateProduct);
-        //    }
-        //}
+            //foreach (Product product in products)
+            //{
+            //    UpdateProductDTO updateProduct = new()
+            //    {
+            //        ProName = product.ProName,
+            //        Description = product.Description,
+            //        ImgUrl = product.ImgUrl,
+            //        Price = product.Price,
+            //        Category = currentCate.CateName
+            //    };
+
+            //    await _productService.UpdateProductAsync(product.Id, updateProduct);
+        }
+
+        public async Task DeleteCategoryAsync(int cateId)
+        {
+            Category? currentCate = await _categoryRepository.GetCategoryByIdAsync(cateId);
+
+            if (currentCate == null)
+            {
+                throw new CategoryNotFoundException(cateId);
+            }
+
+            await _categoryRepository.DeleteCategoryAsync(cateId);
+        }
     }
 }

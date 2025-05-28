@@ -7,8 +7,9 @@ namespace SonitCustom.BLL.Interface
 {
     public interface ICategoryService
     {
-        //Task<bool> CreateCategoryAsync(string categoryName);
-        //Task<List<CategoryDTO>> GetAllCategoriesAsync();
-        //Task UpdateCategoryAsync(int cateId, UpdateCategoryDTO categoryDTO);
+        Task<List<CategoryDTO>> GetAllCategoriesAsync();
+        Task CreateCategoryAsync(string categoryName);
+        Task UpdateCategoryAsync(int cateId, UpdateCategoryDTO categoryDTO);
+        Task DeleteCategoryAsync(int cateId);
     }
-} 
+}
