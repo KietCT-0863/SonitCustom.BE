@@ -7,7 +7,9 @@ namespace SonitCustom.DAL.Entities;
 
 public partial class Product
 {
-    public string ProId { get; set; }
+    public int Id { get; set; }
+
+    public string ProdId { get; set; }
 
     public string ProName { get; set; }
 
@@ -15,9 +17,11 @@ public partial class Product
 
     public string ImgUrl { get; set; }
 
-    public string Price { get; set; }
+    public double Price { get; set; }
 
-    public int? Category { get; set; }
+    public int Category { get; set; }
+
+    public bool IsCustom { get; set; }
 
     public virtual Category CategoryNavigation { get; set; }
 }

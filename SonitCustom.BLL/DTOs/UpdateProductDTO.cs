@@ -17,7 +17,7 @@ namespace SonitCustom.BLL.DTOs
         public string ImgUrl { get; set; }
 
         [RegularExpression(@"^\d+$", ErrorMessage = "Giá chỉ được chứa số")]
-        public string Price { get; set; }
+        public double Price { get; set; }
 
         public string Category { get; set; }
     }

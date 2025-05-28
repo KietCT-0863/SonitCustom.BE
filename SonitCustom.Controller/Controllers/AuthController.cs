@@ -31,7 +31,7 @@ namespace SonitCustom.Controller.Controllers
             if (user == null)
             {
                 return Unauthorized(new { message = "Tên đăng nhập hoặc mật khẩu không đúng" });
-            }    
+            }
 
             AccessTokenDTO accessToken = _tokenService.GenerateAccessToken(user.Id, user.RoleName);
             RefreshTokenDTO refreshToken = _tokenService.GenerateRefreshToken(user.Id);
@@ -39,7 +39,8 @@ namespace SonitCustom.Controller.Controllers
             CookieHelper.SetAccessTokenCookie(Response, accessToken);
             CookieHelper.SetRefreshTokenCookie(Response, refreshToken);
 
-            return Ok(new { 
+            return Ok(new
+            {
                 message = "Đăng nhập thành công",
             });
         }
@@ -55,9 +56,10 @@ namespace SonitCustom.Controller.Controllers
 
             CookieHelper.RemoveAllAuthCookies(Response);
 
-            return Ok(new { 
-                message = "Đăng xuất thành công" 
+            return Ok(new
+            {
+                message = "Đăng xuất thành công"
             });
         }
     }
-} 
+}

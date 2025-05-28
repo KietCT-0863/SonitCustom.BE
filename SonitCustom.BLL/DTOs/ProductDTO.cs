@@ -9,7 +9,7 @@ namespace SonitCustom.BLL.DTOs
 {
     public class ProductDTO
     {
-        public string ProId { get; set; }
+        public string ProdId { get; set; }
 
         public string ProName { get; set; }
 
@@ -17,7 +17,7 @@ namespace SonitCustom.BLL.DTOs
 
         public string ImgUrl { get; set; }
 
-        public string Price { get; set; }
+        public double Price { get; set; }
 
         public string Category { get; set; }
     }

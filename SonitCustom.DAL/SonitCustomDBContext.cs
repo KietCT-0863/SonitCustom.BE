@@ -62,22 +62,22 @@ public partial class SonitCustomDBContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.ProId).HasName("PK__Product__6202959056ABE7C2");
+            entity.HasKey(e => e.Id).HasName("PK__Product__3214EC0707680031");
 
             entity.ToTable("Product");
 
-            entity.Property(e => e.ProId).HasMaxLength(50);
             entity.Property(e => e.ImgUrl).HasMaxLength(255);
-            entity.Property(e => e.Price)
-                .IsRequired()
-                .HasMaxLength(50);
             entity.Property(e => e.ProName)
                 .IsRequired()
                 .HasMaxLength(100);
+            entity.Property(e => e.ProdId)
+                .IsRequired()
+                .HasMaxLength(50);
 
             entity.HasOne(d => d.CategoryNavigation).WithMany(p => p.Products)
                 .HasForeignKey(d => d.Category)
-                .HasConstraintName("FK__Product__Categor__3F466844");
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Product_Category");
         });
 
         modelBuilder.Entity<Role>(entity =>

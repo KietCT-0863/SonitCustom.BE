@@ -21,7 +21,7 @@ namespace SonitCustom.BLL.DTOs
 
         [Required(ErrorMessage = "Giá không được để trống")]
         [RegularExpression(@"^\d+$", ErrorMessage = "Giá chỉ được chứa số")]
-        public string Price { get; set; }
+        public double Price { get; set; }
 
         [Required(ErrorMessage = "Danh mục không được để trống")]
         public string Category { get; set; }
