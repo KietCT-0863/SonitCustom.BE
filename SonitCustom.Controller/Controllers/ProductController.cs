@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SonitCustom.BLL.DTOs;
+using SonitCustom.BLL.DTOs.Products;
 using SonitCustom.BLL.Exceptions;
 using SonitCustom.BLL.Interface;
+using SonitCustom.BLL.Interface.Security;
 using SonitCustom.Controller.Helpers;
 
 namespace SonitCustom.Controller.Controllers

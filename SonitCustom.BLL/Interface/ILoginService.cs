@@ -1,4 +1,4 @@
-using SonitCustom.BLL.DTOs;
+using SonitCustom.BLL.DTOs.Users;
 
 namespace SonitCustom.BLL.Interface
 {

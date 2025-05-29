@@ -1,36 +1,52 @@
-using System.Text;
 using SonitCustom.BLL.Interface;
 using SonitCustom.DAL.Repositories;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using SonitCustom.DAL.Entities;
-using SonitCustom.BLL.DTOs;
+using SonitCustom.BLL.Interface.Security;
+using SonitCustom.BLL.DTOs.Users;
 
 namespace SonitCustom.BLL.Services
 {
     public class LoginService : ILoginService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IConfiguration _configuration;
+        private readonly IJwtService _jwtService;
 
-        public LoginService(IUserRepository userRepository, IConfiguration configuration)
+        public LoginService(IUserRepository userRepository, IJwtService jwtService)
         {
             _userRepository = userRepository;
-            _configuration = configuration;
+            _jwtService = jwtService;
         }
 
         public async Task<UserDTO?> LoginAsync(string username, string password)
         {
-            User user = await _userRepository.GetUserAsync(username, password);
+            User? user = await GetValidUserAsync(username, password);
 
             if (user == null)
             {
                 return null;
             }    
 
-            UserDTO userDTO = new()
+            return MapUserToDto(user);
+        }
+
+        public async Task<string> GenerateJwtTokenAsync(UserDTO userDto)
+        {
+            return await _jwtService.GenerateTokenAsync(userDto);
+        }
+
+        private async Task<User?> GetValidUserAsync(string username, string password)
+        {
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                return null;
+            }
+
+            return await _userRepository.GetUserAsync(username, password);
+        }
+
+        private UserDTO MapUserToDto(User user)
+        {
+            return new UserDTO
             {
                 Id = user.id,
                 Username = user.username,
@@ -38,36 +54,6 @@ namespace SonitCustom.BLL.Services
                 Fullname = user.fullname,
                 RoleName = user.roleNavigation?.roleName
             };
-            
-            return userDTO;
-        }
-
-        public Task<string> GenerateJwtTokenAsync(UserDTO userDto)
-        {
-            IConfigurationSection jwtSettings = _configuration.GetSection("Jwt");
-
-            Claim[] claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, userDto.Username),
-                new Claim("userid", userDto.Id.ToString()),
-                new Claim("role", userDto.RoleName ?? ""),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
-            SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            JwtSecurityToken token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings["Expires"])),
-                signingCredentials: creds
-            );
-
-            string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return Task.FromResult(tokenString);
         }
     }
 }

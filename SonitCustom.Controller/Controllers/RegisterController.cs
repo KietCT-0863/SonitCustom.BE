@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SonitCustom.BLL.Interface;
-using SonitCustom.BLL.DTOs;
+using SonitCustom.BLL.DTOs.Users;
 
 namespace SonitCustom.Controller.Controllers
 {

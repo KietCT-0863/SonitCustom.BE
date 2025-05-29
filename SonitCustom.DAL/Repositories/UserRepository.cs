@@ -44,5 +44,12 @@ namespace SonitCustom.DAL.Repositories
             
             return user?.roleNavigation?.roleName;
         }
+
+        public async Task<bool> CheckUserExistsAsync(string username, string email)
+        {
+            return await _context.Users
+                .AnyAsync(u => u.username.ToLower() == username.ToLower() || 
+                              u.email.ToLower() == email.ToLower());
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace SonitCustom.BLL.DTOs
+namespace SonitCustom.BLL.DTOs.Categories
 {
     public class CategoryDTO
     {
@@ -8,4 +8,4 @@
 
         public string Prefix { get; set; }
     }
-}
+} 

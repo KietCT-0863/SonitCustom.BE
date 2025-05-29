@@ -1,9 +1,6 @@
-using Microsoft.AspNetCore.Http;
-using SonitCustom.BLL.DTOs;
+using SonitCustom.BLL.DTOs.Auth;
 using SonitCustom.BLL.Exceptions;
-using SonitCustom.BLL.Interface;
-using System;
-using System.Threading.Tasks;
+using SonitCustom.BLL.Interface.Security;
 
 namespace SonitCustom.Controller.Helpers
 {
@@ -84,7 +81,7 @@ namespace SonitCustom.Controller.Helpers
                     AccessTokenDTO newAccessToken = await tokenService.RefreshAccessTokenAsync(refreshToken);
                     SetAccessTokenCookie(response, newAccessToken);
                 }
-                catch (InvalidRefreshTokenException) // Giả sử bạn định nghĩa exception này trong BLL
+                catch (InvalidRefreshTokenException)
                 {
                     throw new UnauthorizedAccessException("Refresh token đã hết hạn, vui lòng đăng nhập lại");
                 }

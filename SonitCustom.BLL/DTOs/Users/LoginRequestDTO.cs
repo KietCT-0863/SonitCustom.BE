@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace SonitCustom.BLL.DTOs
+namespace SonitCustom.BLL.DTOs.Users
 {
     public class LoginRequestDTO
     {
@@ -10,4 +10,4 @@ namespace SonitCustom.BLL.DTOs
         [Required(ErrorMessage = "Mật khẩu không được để trống")]
         public string Password { get; set; }
     }
-}
+} 

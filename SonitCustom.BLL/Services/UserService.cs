@@ -1,4 +1,4 @@
-using SonitCustom.BLL.DTOs;
+using SonitCustom.BLL.DTOs.Users;
 using SonitCustom.BLL.Interface;
 using SonitCustom.DAL.Entities;
 using SonitCustom.DAL.Repositories;

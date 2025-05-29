@@ -52,9 +52,9 @@ namespace SonitCustom.DAL.Repositories
             await _context.SaveChangesAsync();
         }
 
-        //public async Task<List<Product>> GetAllProductOfCategoryAsync(int cateId)
-        //{
-        //    return await _context.Products.Where(p => p.CategoryNavigation.CateId == cateId).ToListAsync();
-        //}
+        public async Task<List<Product>> GetAllProductOfCategoryAsync(int cateId)
+        {
+            return await _context.Products.Where(p => p.CategoryNavigation.CateId == cateId).ToListAsync();
+        }
     }
 }

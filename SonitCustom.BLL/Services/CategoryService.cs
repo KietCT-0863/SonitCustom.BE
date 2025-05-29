@@ -1,8 +1,8 @@
 ﻿using SonitCustom.BLL.Interface;
 using SonitCustom.DAL.Entities;
 using SonitCustom.DAL.Interface;
-using SonitCustom.BLL.DTOs;
 using SonitCustom.BLL.Exceptions;
+using SonitCustom.BLL.DTOs.Categories;
 
 namespace SonitCustom.BLL.Services
 {
@@ -33,14 +33,9 @@ namespace SonitCustom.BLL.Services
 
         public async Task CreateCategoryAsync(string cateName)
         {
-            Category? existCategory = await _categoryRepository.GetCategoryByNameAsync(cateName);
+            await ValidateCategoryNameAsync(cateName);
 
-            if (existCategory!=null)
-            {
-                throw new CategoryNameExistException(cateName);
-            }
-
-            string newPrefix = await GeneratePrefixFromCategory(cateName);
+            string newPrefix = await GeneratePrefixFromCategoryNameAsync(cateName);
 
             Category category = new()
             {
@@ -51,89 +46,116 @@ namespace SonitCustom.BLL.Services
             await _categoryRepository.CreateCategoryAsync(category);
         }
 
-        private async Task<string> GeneratePrefixFromCategory(string category)
+        private async Task ValidateCategoryNameAsync(string cateName)
         {
-            string[] words = category.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            string newPrefix;
+            Category? existCategory = await _categoryRepository.GetCategoryByNameAsync(cateName);
 
-            if (words.Length == 1)
+            if (existCategory != null)
             {
-                newPrefix = words[0].Length >= 3 ? words[0].Substring(0, 3) : words[0].PadRight(3, 'x');
+                throw new CategoryNameExistException(cateName);
             }
-            else
-            {
-                newPrefix = string.Join("", words.Select(w => w[0]));
-            }
-
-            bool prefixExists = await _categoryRepository.CheckPrefixExistsAsync(newPrefix);
-
-            return prefixExists ? "sonit" : newPrefix;
         }
 
-        public async Task UpdateCategoryAsync(int cateId, UpdateCategoryDTO categoryDTO)
+        public async Task UpdateCategoryAsync(int cateId, UpdateCategoryDTO updateCategory)
         {
-            Category? currentCate = await _categoryRepository.GetCategoryByIdAsync(cateId);
+            Category? currentCate = await ValidateCategoryExistsAsync(cateId);
+            await ValidateCategoryUpdateAsync(updateCategory, currentCate.CateName);
 
-            if (currentCate == null)
-            {
-                throw new CategoryNotFoundException(cateId);
-            }
-
-            if (!string.IsNullOrEmpty(categoryDTO.CateName) && await _categoryRepository.IsCategoryExistAsync(categoryDTO.CateName))
-            {
-                throw new CategoryNameExistException(categoryDTO.CateName);
-            }
-
-            if (await _categoryRepository.CheckPrefixExistsAsync(categoryDTO.Prefix))
-            {
-                throw new CategoryPrefixExistException(categoryDTO.Prefix);
-            }
-
-            if (string.IsNullOrEmpty(categoryDTO.Prefix))
-            {
-                currentCate.CateName = categoryDTO.CateName;
-                currentCate.Prefix = await GeneratePrefixFromCategory(categoryDTO.CateName);
-            }
-            else
-            {
-                currentCate.CateName = string.IsNullOrEmpty(categoryDTO.CateName) ? currentCate.CateName : categoryDTO.CateName;
-                currentCate.Prefix = categoryDTO.Prefix;
-            }
+            currentCate = await ProcessCategoryUpdateAsync(currentCate, updateCategory);
 
             await _categoryRepository.UpdateCategoryAsync(currentCate);
-
-            //// Lấy danh sách tất cả sản phẩm thuộc category này
-            //List<Product> products = await _productRepository.GetAllProductOfCategoryAsync(cateId);
-
-            //if (products == null)
-            //{
-            //    return;
-            //}
-
-            //foreach (Product product in products)
-            //{
-            //    UpdateProductDTO updateProduct = new()
-            //    {
-            //        ProName = product.ProName,
-            //        Description = product.Description,
-            //        ImgUrl = product.ImgUrl,
-            //        Price = product.Price,
-            //        Category = currentCate.CateName
-            //    };
-
-            //    await _productService.UpdateProductAsync(product.Id, updateProduct);
+            await RegenerateProductIdsForCategory(cateId, currentCate);
         }
 
         public async Task DeleteCategoryAsync(int cateId)
         {
-            Category? currentCate = await _categoryRepository.GetCategoryByIdAsync(cateId);
+            Category? currentCate = await ValidateCategoryExistsAsync(cateId);
+            await _categoryRepository.DeleteCategoryAsync(currentCate);
+        }
 
-            if (currentCate == null)
+        private async Task<Category?> ValidateCategoryExistsAsync(int cateId)
+        {
+            Category? category = await _categoryRepository.GetCategoryByIdAsync(cateId);
+
+            if (category == null)
             {
                 throw new CategoryNotFoundException(cateId);
             }
 
-            await _categoryRepository.DeleteCategoryAsync(currentCate);
+            return category;
+        }
+
+        private async Task ValidateCategoryUpdateAsync(UpdateCategoryDTO updateCategory, string currentName)
+        {
+            if (!string.IsNullOrEmpty(updateCategory.CateName) && updateCategory.CateName != currentName &&
+                await _categoryRepository.IsCategoryExistAsync(updateCategory.CateName))
+            {
+                throw new CategoryNameExistException(updateCategory.CateName);
+            }
+
+            if (!string.IsNullOrEmpty(updateCategory.Prefix) &&
+                await _categoryRepository.CheckPrefixExistsAsync(updateCategory.Prefix))
+            {
+                throw new CategoryPrefixExistException(updateCategory.Prefix);
+            }
+        }
+
+        private async Task<Category> ProcessCategoryUpdateAsync(Category category, UpdateCategoryDTO updateCategory)
+        {
+            if (string.IsNullOrEmpty(updateCategory.Prefix))
+            {
+                if (!string.IsNullOrEmpty(updateCategory.CateName))
+                {
+                    category.CateName = updateCategory.CateName;
+                    category.Prefix = await GeneratePrefixFromCategoryNameAsync(updateCategory.CateName);
+                }
+            }
+            else
+            {
+                category.CateName = string.IsNullOrEmpty(updateCategory.CateName) ? category.CateName : updateCategory.CateName;
+                category.Prefix = updateCategory.Prefix;
+            }
+
+            return category;
+        }
+
+        private async Task<string> GeneratePrefixFromCategoryNameAsync(string category)
+        {
+            string suggestedPrefix = CreatePrefixFromCategoryName(category);
+            return await GetUniquePrefixAsync(suggestedPrefix);
+        }
+
+        private string CreatePrefixFromCategoryName(string category)
+        {
+            string[] words = category.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (words.Length == 1)
+            {
+                return words[0].Length >= 3 ? words[0].Substring(0, 3) : words[0].PadRight(3, 'x');
+            }
+
+            return string.Join("", words.Select(w => w[0]));
+        }
+
+        private async Task<string> GetUniquePrefixAsync(string suggestedPrefix)
+        {
+            bool prefixExists = await _categoryRepository.CheckPrefixExistsAsync(suggestedPrefix);
+            return prefixExists ? "sonit" : suggestedPrefix;
+        }
+
+        private async Task RegenerateProductIdsForCategory(int categoryId, Category updatedCategory)
+        {
+            List<Product> products = await _productRepository.GetAllProductOfCategoryAsync(categoryId);
+
+            if (products == null)
+            {
+                return;
+            }
+
+            foreach (Product product in products)
+            {
+                await _productService.RegenerateProductIdAfterCategoryUpdate(product.ProdId, updatedCategory);
+            }
         }
     }
 }

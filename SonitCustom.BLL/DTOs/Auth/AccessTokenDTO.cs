@@ -1,4 +1,4 @@
-namespace SonitCustom.BLL.DTOs
+namespace SonitCustom.BLL.DTOs.Auth
 {
     public class AccessTokenDTO
     {

@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SonitCustom.DAL.Interface;
+using SonitCustom.BLL.Interface.Security;
+using SonitCustom.BLL.Security;
+using SonitCustom.BLL.Settings;
 
 namespace SonitCustom.Controller
 {
@@ -41,16 +44,30 @@ namespace SonitCustom.Controller
             builder.Services.AddDbContext<SonitCustomDBContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            // Đăng ký các settings
+            builder.Services.AddSingleton<TokenSettings>(provider => 
+                new TokenSettings(builder.Configuration));
+            builder.Services.AddSingleton<JwtSettings>(provider => 
+                new JwtSettings(builder.Configuration));
+                
+            // Đăng ký các repository
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IProductRepository, ProductRepository>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
+            // Đăng ký các service nghiệp vụ
             builder.Services.AddScoped<ILoginService, LoginService>();
             builder.Services.AddScoped<IRegisterService, RegisterService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IProductService, ProductService>();
-            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
 
+            // Đăng ký các security service
+            builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
+            builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+            builder.Services.AddScoped<ITokenStorage, MemoryCacheTokenStorage>();
 
             // Cấu hình Authentication
             builder.Services.AddAuthentication(options =>
