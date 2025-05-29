@@ -17,7 +17,10 @@ namespace SonitCustom.BLL.DTOs
         [RegularExpression(@"^\d+$", ErrorMessage = "Giá chỉ được chứa số")]
         public double Price { get; set; }
 
-        [Required(ErrorMessage = "Danh mục không được để trống")]
+        [Required(ErrorMessage = "Category không được để trống")]
         public string Category { get; set; }
+
+        [Required(ErrorMessage = "IsCustom không được để trống")]
+        public bool IsCustom { get; set; }
     }
 }

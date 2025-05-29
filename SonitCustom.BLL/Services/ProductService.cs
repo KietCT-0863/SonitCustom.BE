@@ -1,5 +1,10 @@
-﻿using SonitCustom.BLL.Interface;
+﻿using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using SonitCustom.BLL.DTOs;
+using SonitCustom.BLL.Exceptions;
+using SonitCustom.BLL.Interface;
+using SonitCustom.DAL.Entities;
 using SonitCustom.DAL.Interface;
+using System.Text.RegularExpressions;
 
 namespace SonitCustom.BLL.Services
 {
@@ -14,27 +19,176 @@ namespace SonitCustom.BLL.Services
             _categoryRepository = categoryRepository;
         }
 
-        //public async Task<List<ProductDTO>> GetAllProductsAsync()
-        //{
-        //    try
-        //    {
-        //        List<Product> products = await _productRepository.GetAllProductsAsync();
+        public async Task<List<ProductDTO>> GetAllProductsAsync()
+        {
+            List<Product> products = await _productRepository.GetAllProductsAsync();
 
-        //        return products.Select(p => new ProductDTO
-        //        {
-        //            ProdId = p.ProdId,
-        //            ProName = p.ProName,
-        //            Description = p.Description,
-        //            Price = p.Price,
-        //            ImgUrl = p.ImgUrl,
-        //            Category = p.CategoryNavigation?.CateName ?? "Uncategorized"
-        //        }).ToList();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception("Error occurred while fetching products", ex);
-        //    }
-        //}
+            return products.Select(p => new ProductDTO
+            {
+                ProdId = p.ProdId,
+                ProName = p.ProName,
+                Description = p.Description,
+                Price = p.Price,
+                ImgUrl = p.ImgUrl,
+                Category = p.CategoryNavigation?.CateName ?? "Uncategorized",
+                IsCustom = p.IsCustom,
+            }).ToList();
+        }
+
+
+
+        public async Task CreateProductAsync(CreateProductDTO product)
+        {
+            if (product == null)
+            {
+                throw new ArgumentNullException(nameof(product));
+            }
+
+            Category? currentCate = await _categoryRepository.GetCategoryByNameAsync(product.Category);
+            if (currentCate == null)
+            {
+                throw new CategoryNotFoundException(product.Category);
+            }
+
+            string proId = await GenerateProductId(currentCate);
+
+            Product newProduct = new()
+            {
+                ProdId = proId,
+                ProName = product.ProName,
+                Description = product.Description,
+                Price = product.Price,
+                ImgUrl = product.ImgUrl,
+                Category = currentCate.CateId,
+                IsCustom = product.Price == 0 ? true : false,
+            };
+
+            await _productRepository.CreateProductAsync(newProduct);
+        }
+
+        private async Task<string> GenerateProductId(Category category)
+        {
+            List<Product> products = await _productRepository.GetProductsByPrefixIdAsync(category.Prefix);
+
+            List<int> existingNumbers = new List<int>();
+            string pattern = $@"{Regex.Escape(category.Prefix)}(\d+)";
+            Regex regex = new Regex(pattern);
+
+            foreach (var product in products)
+            {
+                Match match = regex.Match(product.ProdId);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    if (int.TryParse(match.Groups[1].Value, out int number))
+                    {
+                        existingNumbers.Add(number);
+                    }
+                }
+            }
+
+            int nextNumber = 1;
+            existingNumbers.Sort();
+
+            foreach (int num in existingNumbers)
+            {
+                if (num == nextNumber)
+                {
+                    nextNumber++;
+                }
+                else if (num > nextNumber)
+                {
+                    break;
+                }
+            }
+
+            return $"{category.Prefix}{nextNumber:D3}";
+        }
+
+        public async Task UpdateProductAsync(string proId, UpdateProductDTO updateProduct)
+        {
+            if (updateProduct == null)
+            {
+                throw new ArgumentNullException(nameof(updateProduct));
+            }
+
+            Product? existProduct = await _productRepository.GetProductByProIdAsync(proId);
+
+            if (existProduct == null)
+            {
+                throw new ProductNotFoundException(proId);
+            }
+
+            existProduct = ProcessNormalInformationBeforeUpdate(existProduct, updateProduct);
+            existProduct = await ProcessSpecalInformationBeforeUpdate(existProduct, updateProduct);
+            existProduct = ProcessBusinessInformationBeforeUpdate(existProduct, updateProduct);
+
+            await _productRepository.UpdateProductAsync(existProduct);
+        }
+
+        private Product ProcessNormalInformationBeforeUpdate(Product existProduct, UpdateProductDTO updateProduct)
+        {
+            existProduct.ProName = !string.IsNullOrEmpty(updateProduct.ProName) ? updateProduct.ProName : existProduct.ProName;
+            existProduct.Description = !string.IsNullOrEmpty(updateProduct.Description) ? updateProduct.Description : existProduct.Description;
+            existProduct.ImgUrl = !string.IsNullOrEmpty(updateProduct.ImgUrl) ? updateProduct.ImgUrl : existProduct.ImgUrl;
+
+            return existProduct;
+        }
+
+        private async Task<Product> ProcessSpecalInformationBeforeUpdate(Product existProduct, UpdateProductDTO updateProduct)
+        {
+            if (!string.IsNullOrEmpty(updateProduct.Category) && existProduct.CategoryNavigation.CateName != updateProduct.Category)
+            {
+                Category? categoryUpdate = await _categoryRepository.GetCategoryByNameAsync(updateProduct.Category);
+                if (categoryUpdate == null)
+                {
+                    throw new CategoryNotFoundException(updateProduct.Category);
+                }
+
+                existProduct.Category = categoryUpdate.CateId;
+                existProduct.ProdId = await GenerateProductId(categoryUpdate);
+            }
+
+            return existProduct;
+        }
+
+        private Product ProcessBusinessInformationBeforeUpdate(Product existProduct, UpdateProductDTO updateProduct)
+        {
+            if (updateProduct.Price == null)
+            {
+                if (updateProduct.IsCustom != null)
+                {
+                    existProduct.IsCustom = updateProduct.IsCustom.Value;
+                }
+            }
+            else if (updateProduct.Price > 0)
+            {
+                existProduct.Price = updateProduct.Price.Value;
+
+                if (updateProduct.IsCustom != null)
+                {
+                    existProduct.IsCustom = updateProduct.IsCustom.Value;
+                }
+            }
+            else
+            {
+                existProduct.Price = 0;
+                existProduct.IsCustom = true;
+            }
+
+            return existProduct;
+        }
+
+        public async Task DeleteProductAsync(string prodId)
+        {
+            Product? existProduct = await _productRepository.GetProductByProIdAsync(prodId);
+
+            if (existProduct == null)
+            {
+                throw new ProductNotFoundException(prodId);
+            }
+
+            await _productRepository.DeleteProductAsync(existProduct);
+        }
 
         //public async Task<ProductDTO> GetProductByIdAsync(string id)
         //{
@@ -59,144 +213,6 @@ namespace SonitCustom.BLL.Services
         //    catch (Exception ex)
         //    {
         //        throw new Exception($"Error occurred while fetching product with ID {id}", ex);
-        //    }
-        //}
-
-        //public async Task CreateProductAsync(CreateProductDTO product)
-        //{
-        //    try
-        //    {
-        //        if (product == null)
-        //        {
-        //            throw new ArgumentNullException(nameof(product));
-        //        }
-
-        //        string proId = await GenerateProductId(product.Category);
-        //        int proCate = await _categoryRepository.GetCategoryIdByNameAsync(product.Category);
-
-        //        Product newProduct = new()
-        //        {
-        //            ProdId = proId,
-        //            ProName = product.ProName,
-        //            Description = product.Description,
-        //            Price = product.Price,
-        //            ImgUrl = product.ImgUrl,
-        //            Category = proCate
-        //        };
-
-        //        await _productRepository.CreateProductAsync(newProduct);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception("Error occurred while creating product", ex);
-        //    }
-        //}
-
-        //private async Task<string> GenerateProductId(string category)
-        //{
-        //    int numberOfProducts = await _productRepository.GetNumberOfProductByCategoryAsync(category);
-        //    string prefix = await _categoryRepository.GetPrefixFromCategoryName(category);
-
-        //    return $"{prefix}{(numberOfProducts + 1):D3}";
-        //}
-
-        //public async Task<bool> UpdateProductAsync(int id, UpdateProductDTO product)
-        //{
-        //    try
-        //    {
-        //        if (product == null)
-        //        {
-        //            throw new ArgumentNullException(nameof(product));
-        //        }
-
-        //        Product existProduct = await _productRepository.GetProductByIdAsync(id);
-        //        if (existProduct == null)
-        //        {
-        //            throw new ProductNotFoundException(id);
-        //        }
-
-        //        if (!string.IsNullOrEmpty(product.Category))
-        //        {
-        //            await UpdateProductHaveCategoryAsync(existProduct, product);
-
-        //            // SAU NÀY KHI MỞ RỘNG PROJECT, KHI GỌI HÀM UPDATE MÀ XẢY RA SỰ THAY ĐỔI ID CỦA PRODUCT, THÌ PHẢI ĐỒNG BỘ LẠI ID CỦA PRODUCT ĐÓ Ở NHỮNG TABLE KHÁC ĐỂ TRÁNH VIỆC XUNG ĐỘT DỮ LIỆU
-        //            // *** RẤT QUAN TRỌNG ***
-        //        }
-        //        else
-        //        {
-        //            await UpdateProductHaveNoOrSameCategoryAsync(existProduct, product);
-        //        }
-
-        //        return true;
-        //    }
-        //    catch (ProductNotFoundException)
-        //    {
-        //        throw;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception($"Error occurred while updating product with ID {id}", ex);
-        //    }
-        //}
-
-        //private async Task UpdateProductHaveCategoryAsync(Product existProduct, UpdateProductDTO product)
-        //{
-        //    if (string.IsNullOrEmpty(product.Category))
-        //    {
-        //        return;
-        //    }
-
-        //    int newCategoryId = await _categoryRepository.GetCategoryIdByNameAsync(product.Category);
-            
-        //    if (existProduct.Category == newCategoryId && existProduct.ProdId.StartsWith(existProduct.CategoryNavigation.Prefix, StringComparison.OrdinalIgnoreCase))
-        //    {
-        //        await UpdateProductHaveNoOrSameCategoryAsync(existProduct, product);
-        //        return;
-        //    }
-
-        //    string newId = await GenerateProductId(product.Category);
-
-        //    Product newProduct = new Product
-        //    {
-        //        ProdId = newId,
-        //        ProName = !string.IsNullOrEmpty(product.ProName) ? product.ProName : existProduct.ProName,
-        //        Description = !string.IsNullOrEmpty(product.Description) ? product.Description : existProduct.Description,
-        //        Price = !string.IsNullOrEmpty(product.Price.ToString()) ? product.Price : existProduct.Price,
-        //        ImgUrl = !string.IsNullOrEmpty(product.ImgUrl) ? product.ImgUrl : existProduct.ImgUrl,
-        //        Category = newCategoryId
-        //    };
-
-        //    await _productRepository.DeleteProductAsync(existProduct);
-        //    await _productRepository.CreateProductAsync(newProduct);
-        //}
-         
-        //private async Task UpdateProductHaveNoOrSameCategoryAsync(Product existProduct, UpdateProductDTO product)
-        //{
-        //    existProduct.ProName = !string.IsNullOrEmpty(product.ProName) ? product.ProName : existProduct.ProName;
-        //    existProduct.Description = !string.IsNullOrEmpty(product.Description) ? product.Description : existProduct.Description;
-        //    existProduct.ImgUrl = !string.IsNullOrEmpty(product.ImgUrl) ? product.ImgUrl : existProduct.ImgUrl;
-        //    existProduct.Price = !string.IsNullOrEmpty(product.Price.ToString()) ? product.Price : existProduct.Price;
-
-        //    await _productRepository.UpdateProductAsync(existProduct);
-        //}
-
-        //public async Task<bool> DeleteProductAsync(string id)
-        //{
-        //    try
-        //    {
-        //        Product existProduct = await _productRepository.GetProductByIdAsync(id);
-
-        //        if (existProduct == null)
-        //        {
-        //            throw new ProductNotFoundException(id);
-        //        }
-
-        //        await _productRepository.DeleteProductAsync(existProduct);
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception($"Error occurred while deleting product with ID {id}", ex);
         //    }
         //}
     }
