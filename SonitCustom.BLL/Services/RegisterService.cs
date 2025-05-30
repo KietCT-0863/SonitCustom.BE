@@ -32,7 +32,7 @@ namespace SonitCustom.BLL.Services
             
             if (userExists)
             {
-                throw new DuplicateUserCredentialsException(username, email);
+                throw new UserCredentialsAlreadyExistsException(username, email);
             }
         }
 

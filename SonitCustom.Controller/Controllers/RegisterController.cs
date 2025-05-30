@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SonitCustom.BLL.Interface;
 using SonitCustom.BLL.DTOs.Users;
+using SonitCustom.BLL.Exceptions;
 
 namespace SonitCustom.Controller.Controllers
 {
@@ -26,16 +27,20 @@ namespace SonitCustom.Controller.Controllers
                 }
 
                 bool createdUser = await _registerService.RegisterAsync(newRegister);
-                if (createdUser == null)
+                if (!createdUser)
                 {
                     return BadRequest(new { message = "Đăng ký thất bại" });
                 }
 
                 return Ok(new { message = "Đăng ký thành công" });
             }
+            catch (UserCredentialsAlreadyExistsException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
     }

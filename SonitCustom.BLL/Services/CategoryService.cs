@@ -52,7 +52,7 @@ namespace SonitCustom.BLL.Services
 
             if (existCategory != null)
             {
-                throw new CategoryNameExistException(cateName);
+                throw new CategoryNameAlreadyExistsException(cateName);
             }
         }
 
@@ -90,13 +90,13 @@ namespace SonitCustom.BLL.Services
             if (!string.IsNullOrEmpty(updateCategory.CateName) && updateCategory.CateName != currentName &&
                 await _categoryRepository.IsCategoryExistAsync(updateCategory.CateName))
             {
-                throw new CategoryNameExistException(updateCategory.CateName);
+                throw new CategoryNameAlreadyExistsException(updateCategory.CateName);
             }
 
             if (!string.IsNullOrEmpty(updateCategory.Prefix) &&
                 await _categoryRepository.CheckPrefixExistsAsync(updateCategory.Prefix))
             {
-                throw new CategoryPrefixExistException(updateCategory.Prefix);
+                throw new CategoryPrefixAlreadyExistsException(updateCategory.Prefix);
             }
         }
 

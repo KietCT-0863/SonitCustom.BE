@@ -34,9 +34,9 @@ namespace SonitCustom.Controller.Controllers
             {
                 return Unauthorized(new { message = "Bạn không có quyền sử dụng API này" });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Đã xảy ra lỗi khi lấy danh sách người dùng" });
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
 

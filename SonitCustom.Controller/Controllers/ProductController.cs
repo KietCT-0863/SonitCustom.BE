@@ -33,7 +33,7 @@ namespace SonitCustom.Controller.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
 
@@ -82,7 +82,7 @@ namespace SonitCustom.Controller.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
 
@@ -116,7 +116,7 @@ namespace SonitCustom.Controller.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
 
@@ -141,7 +141,7 @@ namespace SonitCustom.Controller.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
     }

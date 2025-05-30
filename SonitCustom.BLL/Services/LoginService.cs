@@ -3,6 +3,7 @@ using SonitCustom.DAL.Repositories;
 using SonitCustom.DAL.Entities;
 using SonitCustom.BLL.Interface.Security;
 using SonitCustom.BLL.DTOs.Users;
+using SonitCustom.BLL.Exceptions;
 
 namespace SonitCustom.BLL.Services
 {
@@ -17,14 +18,14 @@ namespace SonitCustom.BLL.Services
             _jwtService = jwtService;
         }
 
-        public async Task<UserDTO?> LoginAsync(string username, string password)
+        public async Task<UserDTO> LoginAsync(string username, string password)
         {
             User? user = await GetValidUserAsync(username, password);
 
             if (user == null)
             {
-                return null;
-            }    
+                throw new InvalidCredentialsException(username);
+            }
 
             return MapUserToDto(user);
         }
@@ -36,11 +37,6 @@ namespace SonitCustom.BLL.Services
 
         private async Task<User?> GetValidUserAsync(string username, string password)
         {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-            {
-                return null;
-            }
-
             return await _userRepository.GetUserAsync(username, password);
         }
 
@@ -52,7 +48,7 @@ namespace SonitCustom.BLL.Services
                 Username = user.username,
                 Email = user.email,
                 Fullname = user.fullname,
-                RoleName = user.roleNavigation?.roleName
+                RoleName = user.roleNavigation.roleName
             };
         }
     }

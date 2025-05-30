@@ -4,6 +4,7 @@ using SonitCustom.Controller.Helpers;
 using SonitCustom.BLL.Interface.Security;
 using SonitCustom.BLL.DTOs.Users;
 using SonitCustom.BLL.DTOs.Auth;
+using SonitCustom.BLL.Exceptions;
 
 namespace SonitCustom.Controller.Controllers
 {
@@ -13,35 +14,39 @@ namespace SonitCustom.Controller.Controllers
     {
         private readonly ILoginService _loginService;
         private readonly ITokenService _tokenService;
-        private readonly IUserService _userService;
 
-        public AuthController(ILoginService loginService, ITokenService tokenService, IUserService userService)
+        public AuthController(ILoginService loginService, ITokenService tokenService)
         {
             _loginService = loginService;
             _tokenService = tokenService;
-            _userService = userService;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDTO request)
         {
-            UserDTO? user = await _loginService.LoginAsync(request.Username, request.Password);
-
-            if (user == null)
+            try
             {
-                return Unauthorized(new { message = "Tên đăng nhập hoặc mật khẩu không đúng" });
+                UserDTO user = await _loginService.LoginAsync(request.Username, request.Password);
+
+                AccessTokenDTO accessToken = _tokenService.GenerateAccessToken(user.Id, user.RoleName);
+                RefreshTokenDTO refreshToken = _tokenService.GenerateRefreshToken(user.Id);
+
+                CookieHelper.SetAccessTokenCookie(Response, accessToken);
+                CookieHelper.SetRefreshTokenCookie(Response, refreshToken);
+
+                return Ok(new
+                {
+                    message = "Đăng nhập thành công"
+                });
             }
-
-            AccessTokenDTO accessToken = _tokenService.GenerateAccessToken(user.Id, user.RoleName);
-            RefreshTokenDTO refreshToken = _tokenService.GenerateRefreshToken(user.Id);
-
-            CookieHelper.SetAccessTokenCookie(Response, accessToken);
-            CookieHelper.SetRefreshTokenCookie(Response, refreshToken);
-
-            return Ok(new
+            catch (InvalidCredentialsException ex)
             {
-                message = "Đăng nhập thành công"
-            });
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
+            }
         }
 
         [HttpPost("logout")]

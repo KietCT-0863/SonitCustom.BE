@@ -29,9 +29,9 @@ namespace SonitCustom.Controller.Controllers
                 List<CategoryDTO> categories = await _categoryService.GetAllCategoriesAsync();
                 return Ok(categories);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
 
@@ -49,13 +49,13 @@ namespace SonitCustom.Controller.Controllers
             {
                 return Unauthorized(new { message = ex.Message });
             }
-            catch (CategoryNameExistException ex)
+            catch (CategoryNameAlreadyExistsException ex)
             {
                 return Conflict(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = $"Lỗi khi tạo category: {ex.Message}" });
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
 
@@ -86,17 +86,17 @@ namespace SonitCustom.Controller.Controllers
             {
                 return NotFound(new { message = ex.Message });
             }
-            catch (CategoryNameExistException ex)
+            catch (CategoryNameAlreadyExistsException ex)
             {
                 return Conflict(new { message = ex.Message });
             }
-            catch (CategoryPrefixExistException ex)
+            catch (CategoryPrefixAlreadyExistsException ex)
             {
                 return Conflict(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
 
@@ -125,7 +125,7 @@ namespace SonitCustom.Controller.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
     }
