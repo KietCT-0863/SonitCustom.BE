@@ -51,6 +51,7 @@ namespace SonitCustom.Controller
                 new JwtSettings(builder.Configuration));
                 
             // Đăng ký các repository
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();

@@ -30,7 +30,7 @@ namespace SonitCustom.BLL.Services
             ValidateProduct(productDto);
 
             Category? category = await GetAndValidateCategoryAsync(productDto.Category);
-            
+
             string productId = await GenerateProductId(category);
 
             Product newProduct = new()
@@ -86,7 +86,7 @@ namespace SonitCustom.BLL.Services
                 Description = product.Description,
                 Price = product.Price,
                 ImgUrl = product.ImgUrl,
-                Category = product.CategoryNavigation?.CateName ?? "Uncategorized",
+                Category = product.Category,
                 IsCustom = product.IsCustom
             };
         }
@@ -110,7 +110,7 @@ namespace SonitCustom.BLL.Services
         private async Task<Product> GetAndValidateProductExistsAsync(string productId)
         {
             Product? product = await _productRepository.GetProductByProIdAsync(productId);
-            
+
             if (product == null)
             {
                 throw new ProductNotFoundException(productId);
@@ -119,13 +119,13 @@ namespace SonitCustom.BLL.Services
             return product;
         }
 
-        private async Task<Category> GetAndValidateCategoryAsync(string categoryName)
+        private async Task<Category> GetAndValidateCategoryAsync(int? categoryId)
         {
-            Category? category = await _categoryRepository.GetCategoryByNameAsync(categoryName);
-            
+            Category? category = await _categoryRepository.GetCategoryByIdAsync(categoryId);
+
             if (category == null)
             {
-                throw new CategoryNotFoundException(categoryName);
+                throw new CategoryNotFoundException(categoryId);
             }
 
             return category;
@@ -137,12 +137,12 @@ namespace SonitCustom.BLL.Services
             {
                 product.ProName = updateData.ProName;
             }
-            
+
             if (!string.IsNullOrEmpty(updateData.Description))
             {
                 product.Description = updateData.Description;
             }
-            
+
             if (!string.IsNullOrEmpty(updateData.ImgUrl))
             {
                 product.ImgUrl = updateData.ImgUrl;
@@ -151,8 +151,7 @@ namespace SonitCustom.BLL.Services
 
         private async Task UpdateProductCategoryAndIdAsync(Product product, UpdateProductDTO updateData)
         {
-            if (!string.IsNullOrEmpty(updateData.Category) && 
-                product.CategoryNavigation.CateName != updateData.Category)
+            if (updateData.Category != null && product.Category != updateData.Category)
             {
                 Category? categoryUpdate = await GetAndValidateCategoryAsync(updateData.Category);
                 product.Category = categoryUpdate.CateId;
@@ -190,7 +189,7 @@ namespace SonitCustom.BLL.Services
             List<Product> products = await _productRepository.GetProductsByPrefixIdAsync(category.Prefix);
 
             List<int> existingNumbers = ExtractExistingProductNumbers(products, category.Prefix);
-            
+
             int nextNumber = FindNextAvailableNumber(existingNumbers);
 
             return $"{category.Prefix}{nextNumber:D3}";

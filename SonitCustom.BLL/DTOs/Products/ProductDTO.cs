@@ -12,7 +12,7 @@ namespace SonitCustom.BLL.DTOs.Products
 
         public string ImgUrl { get; set; }
 
-        public string Category { get; set; }
+        public int Category { get; set; }
 
         public bool IsCustom { get; set; }
     }

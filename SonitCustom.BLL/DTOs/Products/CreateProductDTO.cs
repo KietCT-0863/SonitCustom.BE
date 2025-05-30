@@ -18,6 +18,6 @@ namespace SonitCustom.BLL.DTOs.Products
         public double Price { get; set; }
 
         [Required(ErrorMessage = "Danh mục không được để trống")]
-        public string Category { get; set; }
+        public int Category { get; set; }
     }
 } 

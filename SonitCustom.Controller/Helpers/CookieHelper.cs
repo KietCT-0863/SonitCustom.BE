@@ -1,6 +1,7 @@
 using SonitCustom.BLL.DTOs.Auth;
 using SonitCustom.BLL.Exceptions;
 using SonitCustom.BLL.Interface.Security;
+using System.Security.Claims;
 
 namespace SonitCustom.Controller.Helpers
 {
@@ -90,6 +91,17 @@ namespace SonitCustom.Controller.Helpers
                     throw new UnauthorizedAccessException("Không thể làm mới access token");
                 }
             }
+        }
+
+        public static int GetUserIdFromToken(ClaimsPrincipal user)
+        {
+            int userId = int.Parse(user.FindFirst("userid")?.Value ?? "0");
+            if (userId == 0)
+            {
+                throw new UnauthorizedAccessException("Token không hợp lệ hoặc không chứa thông tin người dùng");
+            }
+            
+            return userId;
         }
     }
 }

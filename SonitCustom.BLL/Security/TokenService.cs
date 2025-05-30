@@ -1,6 +1,7 @@
 using SonitCustom.BLL.DTOs.Auth;
 using SonitCustom.BLL.Exceptions;
 using SonitCustom.BLL.Interface.Security;
+using SonitCustom.DAL.Interface;
 using SonitCustom.DAL.Repositories;
 
 namespace SonitCustom.BLL.Security

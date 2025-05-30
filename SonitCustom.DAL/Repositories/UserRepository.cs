@@ -1,5 +1,6 @@
 ﻿using SonitCustom.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
+using SonitCustom.DAL.Interface;
 
 namespace SonitCustom.DAL.Repositories
 {
@@ -15,6 +16,13 @@ namespace SonitCustom.DAL.Repositories
         public async Task<List<User>> GetAllUserAsync()
         {
             return await _context.Users.Include(u => u.roleNavigation).ToListAsync();
+        }
+
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _context.Users
+                .Include(u => u.roleNavigation)
+                .FirstOrDefaultAsync(u => u.id == userId);
         }
 
         public async Task AddNewUserAsync(User newUser)
@@ -42,7 +50,7 @@ namespace SonitCustom.DAL.Repositories
                 .Include(u => u.roleNavigation)
                 .FirstOrDefaultAsync(u => u.id == userId);
             
-            return user?.roleNavigation?.roleName;
+            return user?.roleNavigation.roleName;
         }
 
         public async Task<bool> CheckUserExistsAsync(string username, string email)
@@ -50,6 +58,18 @@ namespace SonitCustom.DAL.Repositories
             return await _context.Users
                 .AnyAsync(u => u.username.ToLower() == username.ToLower() || 
                               u.email.ToLower() == email.ToLower());
+        }
+
+        public async Task<bool> IsUserNameExistsAsync(string username, int excludeUserId = 0)
+        {
+            return await _context.Users
+                .AnyAsync(u => u.username.ToLower() == username.ToLower() && u.id != excludeUserId);
+        }
+
+        public async Task<bool> IsEmailExistsAsync(string email, int excludeUserId = 0)
+        {
+            return await _context.Users
+                .AnyAsync(u => u.email.ToLower() == email.ToLower() && u.id != excludeUserId);
         }
     }
 }

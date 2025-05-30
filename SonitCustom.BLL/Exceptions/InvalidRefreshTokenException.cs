@@ -2,6 +2,11 @@
 {
     public class InvalidRefreshTokenException : Exception
     {
-        public InvalidRefreshTokenException(string message) : base(message) { }
+        public string TokenMessage { get; }
+
+        public InvalidRefreshTokenException(string message) : base(message) 
+        {
+            TokenMessage = message;
+        }
     }
 }

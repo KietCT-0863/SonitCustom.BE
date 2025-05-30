@@ -9,13 +9,10 @@ namespace SonitCustom.DAL.Interface
         Task<Category?> GetCategoryByNameAsync(string cateName);
         Task<bool> CheckPrefixExistsAsync(string prefix);
         Task UpdateCategoryAsync(Category category);
-        Task<Category?> GetCategoryByIdAsync(int id);
+        Task<Category?> GetCategoryByIdAsync(int? id);
         Task<bool> IsCategoryExistAsync(string cateName);
         Task DeleteCategoryAsync(Category category);
-        Task<string> GetPrefixFromCategoryName(string categoryName);
+        //Task<string> GetPrefixFromCategoryName(string categoryName);
         //Task<int> GetCategoryIdByNameAsync(string cateName);
-
-
-
     }
 }

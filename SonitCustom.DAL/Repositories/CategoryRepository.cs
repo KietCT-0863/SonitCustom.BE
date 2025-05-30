@@ -41,7 +41,7 @@ namespace SonitCustom.DAL.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Category?> GetCategoryByIdAsync(int id)
+        public async Task<Category?> GetCategoryByIdAsync(int? id)
         {
             return await _context.Categories.FirstOrDefaultAsync(c => c.CateId == id);
         }
@@ -58,12 +58,12 @@ namespace SonitCustom.DAL.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<string> GetPrefixFromCategoryName(string categoryName)
-        {
-            Category? category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.CateName.ToLower() == categoryName.ToLower());
+        //public async Task<string> GetPrefixFromCategoryName(string categoryName)
+        //{
+        //    Category? category = await _context.Categories
+        //        .FirstOrDefaultAsync(c => c.CateName.ToLower() == categoryName.ToLower());
 
-            return category?.Prefix ?? throw new ArgumentException($"Category with name '{categoryName}' not found");
-        }
+        //    return category?.Prefix ?? throw new ArgumentException($"Category with name '{categoryName}' not found");
+        //}
     }
 }
