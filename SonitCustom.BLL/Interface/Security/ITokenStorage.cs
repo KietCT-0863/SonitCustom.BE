@@ -6,6 +6,7 @@ namespace SonitCustom.BLL.Interface.Security
     {
         void StoreRefreshToken(RefreshTokenDTO refreshToken);
         RefreshTokenDTO GetRefreshToken(string token);
+        RefreshTokenDTO GetRefreshTokenByUserId(int userId);
         void RemoveRefreshToken(string token);
         bool RefreshTokenExists(string token);
     }

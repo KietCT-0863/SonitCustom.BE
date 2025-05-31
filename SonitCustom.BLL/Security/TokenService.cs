@@ -2,7 +2,6 @@ using SonitCustom.BLL.DTOs.Auth;
 using SonitCustom.BLL.Exceptions;
 using SonitCustom.BLL.Interface.Security;
 using SonitCustom.DAL.Interface;
-using SonitCustom.DAL.Repositories;
 
 namespace SonitCustom.BLL.Security
 {
@@ -52,6 +51,11 @@ namespace SonitCustom.BLL.Security
         public async Task RevokeRefreshTokenAsync(string refreshToken)
         {
             await _refreshTokenService.RevokeRefreshTokenAsync(refreshToken);
+        }
+
+        public async Task RevokeRefreshTokenByUserIdAsync(int userId)
+        {
+            await _refreshTokenService.RevokeRefreshTokenByUserIdAsync(userId);
         }
 
         public async Task<RefreshTokenDTO?> ValidateRefreshTokenAsync(string refreshToken)

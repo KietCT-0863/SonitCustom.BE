@@ -17,7 +17,7 @@ namespace SonitCustom.BLL.Services
             _roleRepository = roleRepository;
         }
 
-        public async Task<UserDTO> GetUserByIdAsync(int id)
+        public async Task<RespondUserDTO> GetUserByIdAsync(int id)
         {
             User? user = await _userRepository.GetUserByIdAsync(id);
 
@@ -26,7 +26,7 @@ namespace SonitCustom.BLL.Services
                 throw new UserNotFoundException(id);
             }
 
-            return MapUserToDto(user);
+            return MapUserToRespondDto(user);
         }
 
         public async Task<List<UserDTO>> GetAllUsersAsync()
@@ -44,7 +44,7 @@ namespace SonitCustom.BLL.Services
         {
             User? userToUpdate = await GetUserByIdOrThrowAsync(userId);
 
-            await ValidateUserInfoAsync(userId, updateUserDTO.Username, updateUserDTO.Email, userToUpdate.username, userToUpdate.email);
+            await ValidateUserInfoAsync(userId, updateUserDTO.Username, updateUserDTO.Email, userToUpdate.Username, userToUpdate.Email);
 
             UpdateUserFields(userToUpdate, updateUserDTO);
 
@@ -55,7 +55,7 @@ namespace SonitCustom.BLL.Services
         {
             User? userToUpdate = await GetUserByIdOrThrowAsync(userId);
 
-            await ValidateUserInfoAsync(userId, adminUpdateUserDTO.Username, adminUpdateUserDTO.Email, userToUpdate.username, userToUpdate.email);
+            await ValidateUserInfoAsync(userId, adminUpdateUserDTO.Username, adminUpdateUserDTO.Email, userToUpdate.Username, userToUpdate.Email);
 
             if (adminUpdateUserDTO.Role.HasValue)
             {
@@ -67,15 +67,40 @@ namespace SonitCustom.BLL.Services
             await _userRepository.UpdateUserAsync(userToUpdate);
         }
 
+        public async Task DeleteAccountAsync(int userId)
+        {
+            User user = await GetUserByIdOrThrowAsync(userId);
+            
+            string? userRole = user.RoleNavigation?.RoleName;
+            if (userRole?.ToLower() == "admin")
+            {
+                throw new AdminDeleteException(userId);
+            }
+            
+            await _userRepository.DeleteUserAsync(user);
+        }
+
         private UserDTO MapUserToDto(User user)
         {
             return new UserDTO
             {
-                Id = user.id,
-                Username = user.username,
-                Fullname = user.fullname,
-                Email = user.email,
-                RoleName = user.roleNavigation.roleName
+                Id = user.Id,
+                Username = user.Username,
+                Fullname = user.Fullname,
+                Email = user.Email,
+                RoleName = user.RoleNavigation.RoleName
+            };
+        }
+
+        private RespondUserDTO MapUserToRespondDto(User user)
+        {
+            return new RespondUserDTO
+            {
+                Username = user.Username,
+                Fullname = user.Fullname,
+                Email = user.Email,
+                Password = user.Password,
+                Rolename = user.RoleNavigation.RoleName
             };
         }
 
@@ -125,22 +150,22 @@ namespace SonitCustom.BLL.Services
 
         private void UpdateUserFields(User user, UpdateUserDTO updateDto)
         {
-            user.username = string.IsNullOrEmpty(updateDto.Username) ? user.username : updateDto.Username;
-            user.password = string.IsNullOrEmpty(updateDto.Password) ? user.password : updateDto.Password;
-            user.email = string.IsNullOrEmpty(updateDto.Email) ? user.email : updateDto.Email;
-            user.fullname = string.IsNullOrEmpty(updateDto.Fullname) ? user.fullname : updateDto.Fullname;
+            user.Username = string.IsNullOrEmpty(updateDto.Username) ? user.Username : updateDto.Username;
+            user.Password = string.IsNullOrEmpty(updateDto.Password) ? user.Password : updateDto.Password;
+            user.Email = string.IsNullOrEmpty(updateDto.Email) ? user.Email : updateDto.Email;
+            user.Fullname = string.IsNullOrEmpty(updateDto.Fullname) ? user.Fullname : updateDto.Fullname;
         }
 
         private void UpdateUserFields(User user, AdminUpdateUserDTO adminUpdateDto)
         {
-            user.username = string.IsNullOrEmpty(adminUpdateDto.Username) ? user.username : adminUpdateDto.Username;
-            user.password = string.IsNullOrEmpty(adminUpdateDto.Password) ? user.password : adminUpdateDto.Password;
-            user.email = string.IsNullOrEmpty(adminUpdateDto.Email) ? user.email : adminUpdateDto.Email;
-            user.fullname = string.IsNullOrEmpty(adminUpdateDto.Fullname) ? user.fullname : adminUpdateDto.Fullname;
+            user.Username = string.IsNullOrEmpty(adminUpdateDto.Username) ? user.Username : adminUpdateDto.Username;
+            user.Password = string.IsNullOrEmpty(adminUpdateDto.Password) ? user.Password : adminUpdateDto.Password;
+            user.Email = string.IsNullOrEmpty(adminUpdateDto.Email) ? user.Email : adminUpdateDto.Email;
+            user.Fullname = string.IsNullOrEmpty(adminUpdateDto.Fullname) ? user.Fullname : adminUpdateDto.Fullname;
 
             if (adminUpdateDto.Role.HasValue)
             {
-                user.role = adminUpdateDto.Role.Value;
+                user.Role = adminUpdateDto.Role.Value;
             }
         }
     }

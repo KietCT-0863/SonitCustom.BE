@@ -8,6 +8,7 @@ namespace SonitCustom.BLL.Interface.Security
         RefreshTokenDTO GenerateRefreshToken(int userId);
         Task<AccessTokenDTO> RefreshAccessTokenAsync(string refreshToken);
         Task RevokeRefreshTokenAsync(string refreshToken);
+        Task RevokeRefreshTokenByUserIdAsync(int userId);
         Task<RefreshTokenDTO?> ValidateRefreshTokenAsync(string refreshToken);
         bool ValidateAccessToken(string accessToken);
     }

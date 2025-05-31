@@ -15,14 +15,14 @@ namespace SonitCustom.DAL.Repositories
 
         public async Task<List<User>> GetAllUserAsync()
         {
-            return await _context.Users.Include(u => u.roleNavigation).ToListAsync();
+            return await _context.Users.Include(u => u.RoleNavigation).ToListAsync();
         }
 
         public async Task<User?> GetUserByIdAsync(int userId)
         {
             return await _context.Users
-                .Include(u => u.roleNavigation)
-                .FirstOrDefaultAsync(u => u.id == userId);
+                .Include(u => u.RoleNavigation)
+                .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
         public async Task AddNewUserAsync(User newUser)
@@ -40,36 +40,42 @@ namespace SonitCustom.DAL.Repositories
         public async Task<User?> GetUserAsync(string username, string password)
         {
             return await _context.Users
-                .Include(u => u.roleNavigation)
-                .FirstOrDefaultAsync(u => u.username == username && u.password == password);
+                .Include(u => u.RoleNavigation)
+                .FirstOrDefaultAsync(u => u.Username == username && u.Password == password);
         }
 
         public async Task<string?> GetRoleByUserIdAsync(int userId)
         {
             User? user = await _context.Users
-                .Include(u => u.roleNavigation)
-                .FirstOrDefaultAsync(u => u.id == userId);
+                .Include(u => u.RoleNavigation)
+                .FirstOrDefaultAsync(u => u.Id == userId);
             
-            return user?.roleNavigation.roleName;
+            return user?.RoleNavigation.RoleName;
         }
 
         public async Task<bool> CheckUserExistsAsync(string username, string email)
         {
             return await _context.Users
-                .AnyAsync(u => u.username.ToLower() == username.ToLower() || 
-                              u.email.ToLower() == email.ToLower());
+                .AnyAsync(u => u.Username.ToLower() == username.ToLower() || 
+                              u.Email.ToLower() == email.ToLower());
         }
 
         public async Task<bool> IsUserNameExistsAsync(string username, int excludeUserId = 0)
         {
             return await _context.Users
-                .AnyAsync(u => u.username.ToLower() == username.ToLower() && u.id != excludeUserId);
+                .AnyAsync(u => u.Username.ToLower() == username.ToLower() && u.Id != excludeUserId);
         }
 
         public async Task<bool> IsEmailExistsAsync(string email, int excludeUserId = 0)
         {
             return await _context.Users
-                .AnyAsync(u => u.email.ToLower() == email.ToLower() && u.id != excludeUserId);
+                .AnyAsync(u => u.Email.ToLower() == email.ToLower() && u.Id != excludeUserId);
+        }
+
+        public async Task DeleteUserAsync(User userToDelete)
+        {
+            _context.Users.Remove(userToDelete);
+            await _context.SaveChangesAsync();
         }
     }
 }

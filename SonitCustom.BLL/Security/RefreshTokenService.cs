@@ -57,5 +57,14 @@ namespace SonitCustom.BLL.Security
                 _tokenStorage.RemoveRefreshToken(refreshToken);
             }
         }
+
+        public async Task RevokeRefreshTokenByUserIdAsync(int userId)
+        {
+            RefreshTokenDTO? token = _tokenStorage.GetRefreshTokenByUserId(userId);
+            if (token != null)
+            {
+                _tokenStorage.RemoveRefreshToken(token.Token);
+            }
+        }
     }
 } 

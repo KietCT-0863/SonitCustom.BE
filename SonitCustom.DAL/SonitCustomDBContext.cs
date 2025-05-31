@@ -78,40 +78,40 @@ public partial class SonitCustomDBContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.roleId).HasName("PK__role__CD98462A2DCC03F0");
+            entity.HasKey(e => e.RoleId).HasName("PK__role__CD98462A2DCC03F0");
 
             entity.ToTable("Role");
 
-            entity.Property(e => e.roleName)
+            entity.Property(e => e.RoleName)
                 .IsRequired()
                 .HasMaxLength(100);
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.id).HasName("PK__user__3213E83FF1D470E6");
+            entity.HasKey(e => e.Id).HasName("PK__user__3213E83FF1D470E6");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.email, "UQ__user__AB6E61642BDCBC51").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__user__AB6E61642BDCBC51").IsUnique();
 
-            entity.HasIndex(e => e.username, "UQ__user__F3DBC572421191F4").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__user__F3DBC572421191F4").IsUnique();
 
-            entity.Property(e => e.email)
+            entity.Property(e => e.Email)
                 .IsRequired()
                 .HasMaxLength(100);
-            entity.Property(e => e.fullname)
+            entity.Property(e => e.Fullname)
                 .IsRequired()
                 .HasMaxLength(100);
-            entity.Property(e => e.password)
+            entity.Property(e => e.Password)
                 .IsRequired()
                 .HasMaxLength(255);
-            entity.Property(e => e.username)
+            entity.Property(e => e.Username)
                 .IsRequired()
                 .HasMaxLength(50);
 
-            entity.HasOne(d => d.roleNavigation).WithMany(p => p.Users)
-                .HasForeignKey(d => d.role)
+            entity.HasOne(d => d.RoleNavigation).WithMany(p => p.Users)
+                .HasForeignKey(d => d.Role)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__user__role__3A81B327");
         });

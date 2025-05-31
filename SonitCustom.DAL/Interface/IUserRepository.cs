@@ -13,5 +13,6 @@ namespace SonitCustom.DAL.Interface
         Task<bool> CheckUserExistsAsync(string username, string email);
         Task<bool> IsUserNameExistsAsync(string username, int excludeUserId = 0);
         Task<bool> IsEmailExistsAsync(string email, int excludeUserId = 0);
+        Task DeleteUserAsync(User userToDelete);
     }
 }

@@ -7,5 +7,6 @@ namespace SonitCustom.BLL.Interface.Security
         RefreshTokenDTO GenerateRefreshToken(int userId);
         Task<RefreshTokenDTO?> ValidateRefreshTokenAsync(string refreshToken);
         Task RevokeRefreshTokenAsync(string refreshToken);
+        Task RevokeRefreshTokenByUserIdAsync(int userId);
     }
-} 
+}

@@ -10,12 +10,12 @@ namespace SonitCustom.BLL.Services
     public class LoginService : ILoginService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IJwtService _jwtService;
+        //private readonly IJwtService _jwtService;
 
-        public LoginService(IUserRepository userRepository, IJwtService jwtService)
+        public LoginService(IUserRepository userRepository)
         {
             _userRepository = userRepository;
-            _jwtService = jwtService;
+            //_jwtService = jwtService;
         }
 
         public async Task<UserDTO> LoginAsync(string username, string password)
@@ -30,11 +30,6 @@ namespace SonitCustom.BLL.Services
             return MapUserToDto(user);
         }
 
-        public async Task<string> GenerateJwtTokenAsync(UserDTO userDto)
-        {
-            return await _jwtService.GenerateTokenAsync(userDto);
-        }
-
         private async Task<User?> GetValidUserAsync(string username, string password)
         {
             return await _userRepository.GetUserAsync(username, password);
@@ -44,11 +39,11 @@ namespace SonitCustom.BLL.Services
         {
             return new UserDTO
             {
-                Id = user.id,
-                Username = user.username,
-                Email = user.email,
-                Fullname = user.fullname,
-                RoleName = user.roleNavigation.roleName
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                Fullname = user.Fullname,
+                RoleName = user.RoleNavigation.RoleName
             };
         }
     }

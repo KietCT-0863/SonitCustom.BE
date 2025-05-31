@@ -40,11 +40,11 @@ namespace SonitCustom.BLL.Services
         {
             return new User
             {
-                username = dto.Username,
-                password = dto.Password, // Lưu ý: Nên hash mật khẩu trước khi lưu
-                fullname = dto.Fullname,
-                email = dto.Email,
-                role = DEFAULT_USER_ROLE
+                Username = dto.Username,
+                Password = dto.Password,
+                Fullname = dto.Fullname,
+                Email = dto.Email,
+                Role = DEFAULT_USER_ROLE
             };
         }
     }

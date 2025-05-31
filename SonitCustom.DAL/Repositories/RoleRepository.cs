@@ -15,7 +15,7 @@ namespace SonitCustom.DAL.Repositories
 
         public async Task<bool> IsRoleExistsAsync(int roleId)
         {
-            return await _context.Roles.AnyAsync(r => r.roleId == roleId);
+            return await _context.Roles.AnyAsync(r => r.RoleId == roleId);
         }
 
         public async Task<List<Role>> GetAllRolesAsync()
@@ -25,13 +25,13 @@ namespace SonitCustom.DAL.Repositories
 
         public async Task<Role?> GetRoleByIdAsync(int roleId)
         {
-            return await _context.Roles.FirstOrDefaultAsync(r => r.roleId == roleId);
+            return await _context.Roles.FirstOrDefaultAsync(r => r.RoleId == roleId);
         }
 
         public async Task<string?> GetRoleNameByIdAsync(int roleId)
         {
-            Role? role = await _context.Roles.FirstOrDefaultAsync(r => r.roleId == roleId);
-            return role?.roleName;
+            Role? role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleId == roleId);
+            return role?.RoleName;
         }
     }
 } 
