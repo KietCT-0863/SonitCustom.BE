@@ -86,7 +86,7 @@ namespace SonitCustom.BLL.Services
                 Description = product.Description,
                 Price = product.Price,
                 ImgUrl = product.ImgUrl,
-                Category = product.Category,
+                Category = product.CategoryNavigation.CateName,
                 IsCustom = product.IsCustom
             };
         }

@@ -77,5 +77,10 @@ namespace SonitCustom.DAL.Repositories
             _context.Users.Remove(userToDelete);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<int> CountUsersByRoleIdAsync(int roleId)
+        {
+            return await _context.Users.CountAsync(u => u.Role == roleId);
+        }
     }
 }

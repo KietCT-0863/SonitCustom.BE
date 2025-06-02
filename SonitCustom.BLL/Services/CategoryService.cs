@@ -70,6 +70,9 @@ namespace SonitCustom.BLL.Services
         public async Task DeleteCategoryAsync(int cateId)
         {
             Category? currentCate = await ValidateCategoryExistsAsync(cateId);
+
+            await ValidateCategoryHasNoProductsAsync(cateId);
+
             await _categoryRepository.DeleteCategoryAsync(currentCate);
         }
 
@@ -113,7 +116,7 @@ namespace SonitCustom.BLL.Services
             else
             {
                 category.CateName = string.IsNullOrEmpty(updateCategory.CateName) ? category.CateName : updateCategory.CateName;
-                category.Prefix = updateCategory.Prefix;
+                category.Prefix = updateCategory.Prefix.ToLower();
             }
 
             return category;
@@ -134,7 +137,7 @@ namespace SonitCustom.BLL.Services
                 return words[0].Length >= 3 ? words[0].Substring(0, 3) : words[0].PadRight(3, 'x');
             }
 
-            return string.Join("", words.Select(w => w[0]));
+            return string.Join("", words.Select(w => w[0])).ToLower();
         }
 
         private async Task<string> GetUniquePrefixAsync(string suggestedPrefix)
@@ -155,6 +158,15 @@ namespace SonitCustom.BLL.Services
             foreach (Product product in products)
             {
                 await _productService.RegenerateProductIdAfterCategoryUpdate(product.ProdId, updatedCategory);
+            }
+        }
+
+        private async Task ValidateCategoryHasNoProductsAsync(int cateId)
+        {
+            int productCount = await _productRepository.GetProductCountByCategoryIdAsync(cateId);
+            if (productCount > 0)
+            {
+                throw new CategoryHasProductsException(cateId, productCount);
             }
         }
     }

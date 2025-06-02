@@ -56,5 +56,10 @@ namespace SonitCustom.DAL.Repositories
         {
             return await _context.Products.Where(p => p.CategoryNavigation.CateId == cateId).ToListAsync();
         }
+
+        public async Task<int> GetProductCountByCategoryIdAsync(int cateId)
+        {
+            return await _context.Products.CountAsync(p => p.CategoryNavigation.CateId == cateId);
+        }
     }
 }

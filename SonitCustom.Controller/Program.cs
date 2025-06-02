@@ -62,6 +62,7 @@ namespace SonitCustom.Controller
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
 
             // Đăng ký các security service
             builder.Services.AddScoped<ITokenService, TokenService>();
