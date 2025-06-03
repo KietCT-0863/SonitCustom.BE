@@ -8,12 +8,6 @@ namespace SonitCustom.BLL.Interface
     public interface IR2Service
     {
         /// <summary>
-        /// Lấy URL công khai của R2 bucket
-        /// </summary>
-        /// <returns>URL công khai</returns>
-        string GetPublicUrl();
-        
-        /// <summary>
         /// Tải lên một file lên R2 bucket
         /// </summary>
         /// <param name="file">File được tải lên</param>

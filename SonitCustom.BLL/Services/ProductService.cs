@@ -5,7 +5,6 @@ using SonitCustom.BLL.Interface;
 using SonitCustom.DAL.Entities;
 using SonitCustom.DAL.Interface;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Configuration;
 
 namespace SonitCustom.BLL.Services
 {
@@ -17,7 +16,6 @@ namespace SonitCustom.BLL.Services
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IR2Service _r2Service;
-        private readonly string _publicUrl;
 
         /// <summary>
         /// Khởi tạo đối tượng ProductService
@@ -30,7 +28,6 @@ namespace SonitCustom.BLL.Services
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
             _r2Service = r2Service;
-            _publicUrl = r2Service.GetPublicUrl();
         }
 
         /// <inheritdoc />
@@ -44,13 +41,9 @@ namespace SonitCustom.BLL.Services
         /// <inheritdoc />
         public async Task CreateProductWithImageAsync(CreateProductDataDTO productData, IFormFile productImage)
         {
-            // Lấy đường dẫn đầy đủ từ R2Service
-            string fullImageUrl = await _r2Service.UploadFileAsync(productImage);
-            
-            // Chỉ lưu phần đường dẫn tương đối (bỏ PublicUrl)
-            string relativeImageUrl = fullImageUrl.Replace(_publicUrl + "/", "");
+            string imageUrl = await _r2Service.UploadFileAsync(productImage);
 
-            CreateProductDTO productDto = DataAndImageMapToCreateProductDTO(productData, relativeImageUrl);
+            CreateProductDTO productDto = DataAndImageMapToCreateProductDTO(productData, imageUrl);
             await CreateProductAsync(productDto);
         }
 
@@ -92,15 +85,9 @@ namespace SonitCustom.BLL.Services
         private async Task<string> UpdateProductImageAsync(string oldImageUrl, IFormFile newImage)
         {
             string oldImageKey = ExtractImageKey(oldImageUrl);
-            
-            // Lấy đường dẫn đầy đủ từ R2Service
-            string fullNewImageUrl = await _r2Service.UploadFileAsync(newImage);
-            
-            // Chỉ lưu phần đường dẫn tương đối (bỏ PublicUrl)
-            string relativeNewImageUrl = fullNewImageUrl.Replace(_publicUrl + "/", "");
-            
+            string newImageUrl = await _r2Service.UploadFileAsync(newImage);
             await _r2Service.DeleteFileAsync(oldImageKey);
-            return relativeNewImageUrl;
+            return newImageUrl;
         }
 
         /// <summary>
@@ -168,23 +155,13 @@ namespace SonitCustom.BLL.Services
         /// <returns>Đối tượng ProductDTO</returns>
         private ProductDTO MapProductToDTO(Product product)
         {
-            string imgUrl = product.ImgUrl;
-            
-            // Kiểm tra nếu ImgUrl không bắt đầu bằng http(s), thêm PublicUrl vào
-            if (!string.IsNullOrEmpty(imgUrl) && 
-                !imgUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && 
-                !imgUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            {
-                imgUrl = $"{_publicUrl}/{imgUrl}";
-            }
-
             return new ProductDTO
             {
                 ProdId = product.ProdId,
                 ProName = product.ProName,
                 Description = product.Description,
                 Price = product.Price,
-                ImgUrl = imgUrl,
+                ImgUrl = product.ImgUrl,
                 Category = product.CategoryNavigation.CateName,
                 IsCustom = product.IsCustom
             };
