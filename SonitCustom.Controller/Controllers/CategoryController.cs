@@ -8,6 +8,9 @@ using SonitCustom.BLL.DTOs.Categories;
 
 namespace SonitCustom.Controller.Controllers
 {
+    /// <summary>
+    /// API controller để quản lý category sản phẩm
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -15,12 +18,23 @@ namespace SonitCustom.Controller.Controllers
         private readonly ICategoryService _categoryService;
         private readonly ITokenService _tokenService;
 
+        /// <summary>
+        /// Khởi tạo controller với các dependency cần thiết
+        /// </summary>
+        /// <param name="categoryService">Service xử lý logic category</param>
+        /// <param name="tokenService">Service quản lý token xác thực</param>
         public CategoryController(ICategoryService categoryService, ITokenService tokenService)
         {
             _categoryService = categoryService;
             _tokenService = tokenService;
         }
 
+        /// <summary>
+        /// Lấy tất cả category sản phẩm
+        /// </summary>
+        /// <returns>Danh sách tất cả category</returns>
+        /// <response code="200">Trả về danh sách category</response>
+        /// <response code="500">Lỗi xảy ra khi truy xuất dữ liệu</response>
         [HttpGet]
         public async Task<IActionResult> GetAllCategories()
         {
@@ -35,14 +49,23 @@ namespace SonitCustom.Controller.Controllers
             }
         }
 
+        /// <summary>
+        /// Tạo mới một category sản phẩm
+        /// </summary>
+        /// <param name="createCategoryDTO">Thông tin category cần tạo</param>
+        /// <returns>Thông báo kết quả tạo category</returns>
+        /// <response code="200">Tạo category thành công</response>
+        /// <response code="401">Người dùng không có quyền tạo category</response>
+        /// <response code="409">Tên category đã tồn tại</response>
+        /// <response code="500">Lỗi server</response>
         [HttpPost]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> CreateCategory([FromBody] string categoryName)
+        public async Task<IActionResult> CreateCategory([FromForm] CreateCategoryDTO createCategoryDTO)
         {
             try
             {
                 await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
-                await _categoryService.CreateCategoryAsync(categoryName);
+                await _categoryService.CreateCategoryAsync(createCategoryDTO.CategoryName);
                 return Ok(new { message = "Tạo category thành công" });
             }
             catch (UnauthorizedAccessException ex)
@@ -59,9 +82,21 @@ namespace SonitCustom.Controller.Controllers
             }
         }
 
+        /// <summary>
+        /// Cập nhật thông tin của một category sản phẩm
+        /// </summary>
+        /// <param name="id">ID của category cần cập nhật</param>
+        /// <param name="categoryDTO">Thông tin cần cập nhật</param>
+        /// <returns>Thông báo kết quả cập nhật</returns>
+        /// <response code="200">Cập nhật category thành công</response>
+        /// <response code="400">Dữ liệu không hợp lệ</response>
+        /// <response code="401">Người dùng không có quyền cập nhật category</response>
+        /// <response code="404">Không tìm thấy category</response>
+        /// <response code="409">Tên category hoặc tiền tố đã tồn tại</response>
+        /// <response code="500">Lỗi server</response>
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryDTO categoryDTO)
+        public async Task<IActionResult> UpdateCategory(int id, [FromForm] UpdateCategoryDTO categoryDTO)
         {
             try
             {
@@ -100,6 +135,16 @@ namespace SonitCustom.Controller.Controllers
             }
         }
 
+        /// <summary>
+        /// Xóa một category sản phẩm
+        /// </summary>
+        /// <param name="id">ID của category cần xóa</param>
+        /// <returns>Thông báo kết quả xóa category</returns>
+        /// <response code="200">Xóa category thành công</response>
+        /// <response code="400">ID không hợp lệ hoặc category đang được sử dụng bởi sản phẩm</response>
+        /// <response code="401">Người dùng không có quyền xóa category</response>
+        /// <response code="404">Không tìm thấy category</response>
+        /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteCategory(int id)

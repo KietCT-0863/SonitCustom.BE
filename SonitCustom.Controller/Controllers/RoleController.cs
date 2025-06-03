@@ -8,6 +8,9 @@ using SonitCustom.Controller.Helpers;
 
 namespace SonitCustom.Controller.Controllers
 {
+    /// <summary>
+    /// API controller để quản lý role trong hệ thống
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class RoleController : ControllerBase
@@ -15,12 +18,24 @@ namespace SonitCustom.Controller.Controllers
         private readonly IRoleService _roleService;
         private readonly ITokenService _tokenService;
 
+        /// <summary>
+        /// Khởi tạo controller với các dependency cần thiết
+        /// </summary>
+        /// <param name="roleService">Service xử lý logic role</param>
+        /// <param name="tokenService">Service quản lý token xác thực</param>
         public RoleController(IRoleService roleService, ITokenService tokenService)
         {
             _roleService = roleService;
             _tokenService = tokenService;
         }
 
+        /// <summary>
+        /// Lấy danh sách tất cả role trong hệ thống
+        /// </summary>
+        /// <returns>Danh sách thông tin role</returns>
+        /// <response code="200">Trả về danh sách role</response>
+        /// <response code="401">Người dùng không có quyền truy cập</response>
+        /// <response code="500">Lỗi server</response>
         [HttpGet]
         [Authorize(Roles = "admin")]
         public async Task<ActionResult<List<RoleDTO>>> GetAllRoles()
@@ -55,9 +70,18 @@ namespace SonitCustom.Controller.Controllers
         //    }
         //}
 
+        /// <summary>
+        /// Tạo mới một role trong hệ thống
+        /// </summary>
+        /// <param name="createRoleDTO">Thông tin role cần tạo</param>
+        /// <returns>Thông báo kết quả tạo role</returns>
+        /// <response code="200">Tạo role thành công</response>
+        /// <response code="401">Người dùng không có quyền truy cập</response>
+        /// <response code="409">Tên role đã tồn tại</response>
+        /// <response code="500">Lỗi server</response>
         [HttpPost]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> CreateRole([FromBody] CreateRoleDTO createRoleDTO)
+        public async Task<IActionResult> CreateRole([FromForm] CreateRoleDTO createRoleDTO)
         {
             try
             {
@@ -83,9 +107,20 @@ namespace SonitCustom.Controller.Controllers
             }
         }
 
+        /// <summary>
+        /// Cập nhật thông tin của một role
+        /// </summary>
+        /// <param name="id">ID của role cần cập nhật</param>
+        /// <param name="updateRoleDTO">Thông tin cần cập nhật</param>
+        /// <returns>Thông báo kết quả cập nhật</returns>
+        /// <response code="200">Cập nhật role thành công</response>
+        /// <response code="401">Người dùng không có quyền truy cập</response>
+        /// <response code="404">Không tìm thấy role</response>
+        /// <response code="409">Tên role đã tồn tại</response>
+        /// <response code="500">Lỗi server</response>
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateRoleDTO updateRoleDTO)
+        public async Task<IActionResult> UpdateRole(int id, [FromForm] UpdateRoleDTO updateRoleDTO)
         {
             try
             {
@@ -115,6 +150,16 @@ namespace SonitCustom.Controller.Controllers
             }
         }
 
+        /// <summary>
+        /// Xóa một role trong hệ thống
+        /// </summary>
+        /// <param name="id">ID của role cần xóa</param>
+        /// <returns>Thông báo kết quả xóa role</returns>
+        /// <response code="200">Xóa role thành công</response>
+        /// <response code="400">role đang được sử dụng bởi người dùng</response>
+        /// <response code="401">Người dùng không có quyền truy cập</response>
+        /// <response code="404">Không tìm thấy role</response>
+        /// <response code="500">Lỗi server</response>
         [HttpDelete("{id}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteRole(int id)

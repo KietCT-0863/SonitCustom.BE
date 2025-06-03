@@ -10,6 +10,8 @@ using SonitCustom.DAL.Interface;
 using SonitCustom.BLL.Interface.Security;
 using SonitCustom.BLL.Security;
 using SonitCustom.BLL.Settings;
+using System.Reflection;
+using System.IO;
 
 namespace SonitCustom.Controller
 {
@@ -36,7 +38,20 @@ namespace SonitCustom.Controller
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                // Cấu hình XML cho Controller project
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+                
+                // Cấu hình XML cho BLL project (chứa DTOs)
+                var xmlBLLPath = Path.Combine(AppContext.BaseDirectory, "SonitCustom.BLL.xml");
+                if (File.Exists(xmlBLLPath))
+                {
+                    c.IncludeXmlComments(xmlBLLPath);
+                }
+            });
 
             // Add Memory Cache
             builder.Services.AddMemoryCache();
@@ -49,6 +64,8 @@ namespace SonitCustom.Controller
                 new TokenSettings(builder.Configuration));
             builder.Services.AddSingleton<JwtSettings>(provider => 
                 new JwtSettings(builder.Configuration));
+            builder.Services.AddSingleton<R2Settings>(provider =>
+                new R2Settings(builder.Configuration));
                 
             // Đăng ký các repository
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
@@ -63,6 +80,7 @@ namespace SonitCustom.Controller
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IR2Service, R2Service>();
 
             // Đăng ký các security service
             builder.Services.AddScoped<ITokenService, TokenService>();

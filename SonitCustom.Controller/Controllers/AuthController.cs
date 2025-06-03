@@ -8,6 +8,9 @@ using SonitCustom.BLL.Exceptions;
 
 namespace SonitCustom.Controller.Controllers
 {
+    /// <summary>
+    /// API controller để quản lý xác thực người dùng
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -15,14 +18,27 @@ namespace SonitCustom.Controller.Controllers
         private readonly ILoginService _loginService;
         private readonly ITokenService _tokenService;
 
+        /// <summary>
+        /// Khởi tạo controller với các dependency cần thiết
+        /// </summary>
+        /// <param name="loginService">Service xử lý logic đăng nhập</param>
+        /// <param name="tokenService">Service quản lý token xác thực</param>
         public AuthController(ILoginService loginService, ITokenService tokenService)
         {
             _loginService = loginService;
             _tokenService = tokenService;
         }
 
+        /// <summary>
+        /// Đăng nhập vào hệ thống
+        /// </summary>
+        /// <param name="request">Thông tin đăng nhập</param>
+        /// <returns>Thông báo kết quả đăng nhập</returns>
+        /// <response code="200">Đăng nhập thành công và trả về token xác thực</response>
+        /// <response code="401">Thông tin đăng nhập không hợp lệ</response>
+        /// <response code="500">Lỗi server</response>
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequestDTO request)
+        public async Task<IActionResult> Login([FromForm] LoginRequestDTO request)
         {
             try
             {
@@ -49,6 +65,12 @@ namespace SonitCustom.Controller.Controllers
             }
         }
 
+        /// <summary>
+        /// Đăng xuất khỏi hệ thống
+        /// </summary>
+        /// <returns>Thông báo kết quả đăng xuất</returns>
+        /// <response code="200">Đăng xuất thành công</response>
+        /// <response code="500">Lỗi server</response>
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {

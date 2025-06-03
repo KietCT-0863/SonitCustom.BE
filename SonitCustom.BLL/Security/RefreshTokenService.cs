@@ -5,17 +5,26 @@ using SonitCustom.BLL.Settings;
 
 namespace SonitCustom.BLL.Security
 {
+    /// <summary>
+    /// Service triển khai các thao tác quản lý refresh token
+    /// </summary>
     public class RefreshTokenService : IRefreshTokenService
     {
         private readonly ITokenStorage _tokenStorage;
         private readonly TokenSettings _tokenSettings;
 
+        /// <summary>
+        /// Khởi tạo đối tượng RefreshTokenService
+        /// </summary>
+        /// <param name="tokenStorage">Service lưu trữ token</param>
+        /// <param name="tokenSettings">Cấu hình token</param>
         public RefreshTokenService(ITokenStorage tokenStorage, TokenSettings tokenSettings)
         {
             _tokenStorage = tokenStorage;
             _tokenSettings = tokenSettings;
         }
 
+        /// <inheritdoc />
         public RefreshTokenDTO GenerateRefreshToken(int userId)
         {
             byte[] randomNumber = new byte[32];
@@ -38,6 +47,7 @@ namespace SonitCustom.BLL.Security
             return refreshTokenDTO;
         }
 
+        /// <inheritdoc />
         public async Task<RefreshTokenDTO?> ValidateRefreshTokenAsync(string refreshToken)
         {
             RefreshTokenDTO? token = _tokenStorage.GetRefreshToken(refreshToken);
@@ -50,6 +60,7 @@ namespace SonitCustom.BLL.Security
             return token;
         }
 
+        /// <inheritdoc />
         public async Task RevokeRefreshTokenAsync(string refreshToken)
         {
             if (_tokenStorage.RefreshTokenExists(refreshToken))
@@ -58,6 +69,7 @@ namespace SonitCustom.BLL.Security
             }
         }
 
+        /// <inheritdoc />
         public async Task RevokeRefreshTokenByUserIdAsync(int userId)
         {
             RefreshTokenDTO? token = _tokenStorage.GetRefreshTokenByUserId(userId);

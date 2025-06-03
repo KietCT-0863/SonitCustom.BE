@@ -8,15 +8,23 @@ using SonitCustom.BLL.Settings;
 
 namespace SonitCustom.BLL.Security
 {
+    /// <summary>
+    /// Service triển khai các thao tác quản lý access token
+    /// </summary>
     public class AccessTokenService : IAccessTokenService
     {
         private readonly TokenSettings _tokenSettings;
 
+        /// <summary>
+        /// Khởi tạo đối tượng AccessTokenService
+        /// </summary>
+        /// <param name="tokenSettings">Cấu hình token</param>
         public AccessTokenService(TokenSettings tokenSettings)
         {
             _tokenSettings = tokenSettings;
         }
 
+        /// <inheritdoc />
         public AccessTokenDTO GenerateAccessToken(int userId, string role)
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -44,6 +52,7 @@ namespace SonitCustom.BLL.Security
             };
         }
 
+        /// <inheritdoc />
         public bool ValidateAccessToken(string accessToken)
         {
             try
@@ -61,6 +70,7 @@ namespace SonitCustom.BLL.Security
             }
         }
 
+        /// <inheritdoc />
         public ClaimsPrincipal? GetPrincipalFromAccessToken(string accessToken)
         {
             var tokenHandler = new JwtSecurityTokenHandler();

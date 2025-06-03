@@ -6,12 +6,21 @@ using SonitCustom.BLL.DTOs.Categories;
 
 namespace SonitCustom.BLL.Services
 {
+    /// <summary>
+    /// Service triển khai các thao tác liên quan đến category sản phẩm
+    /// </summary>
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IProductRepository _productRepository;
         private readonly IProductService _productService;
 
+        /// <summary>
+        /// Khởi tạo đối tượng CategoryService
+        /// </summary>
+        /// <param name="categoryRepository">Repository truy vấn dữ liệu category</param>
+        /// <param name="productRepository">Repository truy vấn dữ liệu sản phẩm</param>
+        /// <param name="productService">Service xử lý các thao tác với sản phẩm</param>
         public CategoryService(ICategoryRepository categoryRepository, IProductRepository productRepository, IProductService productService)
         {
             _categoryRepository = categoryRepository;
@@ -19,6 +28,7 @@ namespace SonitCustom.BLL.Services
             _productService = productService;
         }
 
+        /// <inheritdoc />
         public async Task<List<CategoryDTO>> GetAllCategoriesAsync()
         {
             List<Category> categories = await _categoryRepository.GetAllCategoriesAsync();
@@ -31,6 +41,7 @@ namespace SonitCustom.BLL.Services
             }).ToList();
         }
 
+        /// <inheritdoc />
         public async Task CreateCategoryAsync(string cateName)
         {
             await ValidateCategoryNameAsync(cateName);
@@ -46,6 +57,11 @@ namespace SonitCustom.BLL.Services
             await _categoryRepository.CreateCategoryAsync(category);
         }
 
+        /// <summary>
+        /// Kiểm tra tính hợp lệ của tên category
+        /// </summary>
+        /// <param name="cateName">Tên category cần kiểm tra</param>
+        /// <exception cref="CategoryNameAlreadyExistsException">Ném ra khi tên category đã tồn tại</exception>
         private async Task ValidateCategoryNameAsync(string cateName)
         {
             Category? existCategory = await _categoryRepository.GetCategoryByNameAsync(cateName);
@@ -56,6 +72,7 @@ namespace SonitCustom.BLL.Services
             }
         }
 
+        /// <inheritdoc />
         public async Task UpdateCategoryAsync(int cateId, UpdateCategoryDTO updateCategory)
         {
             Category? currentCate = await ValidateCategoryExistsAsync(cateId);
@@ -67,6 +84,7 @@ namespace SonitCustom.BLL.Services
             await RegenerateProductIdsForCategory(cateId, currentCate);
         }
 
+        /// <inheritdoc />
         public async Task DeleteCategoryAsync(int cateId)
         {
             Category? currentCate = await ValidateCategoryExistsAsync(cateId);
@@ -76,6 +94,12 @@ namespace SonitCustom.BLL.Services
             await _categoryRepository.DeleteCategoryAsync(currentCate);
         }
 
+        /// <summary>
+        /// Kiểm tra sự tồn tại của category theo ID
+        /// </summary>
+        /// <param name="cateId">ID của category cần kiểm tra</param>
+        /// <returns>Đối tượng Category nếu tồn tại</returns>
+        /// <exception cref="CategoryNotFoundException">Ném ra khi không tìm thấy category</exception>
         private async Task<Category?> ValidateCategoryExistsAsync(int cateId)
         {
             Category? category = await _categoryRepository.GetCategoryByIdAsync(cateId);
@@ -88,6 +112,13 @@ namespace SonitCustom.BLL.Services
             return category;
         }
 
+        /// <summary>
+        /// Kiểm tra tính hợp lệ của thông tin cập nhật category
+        /// </summary>
+        /// <param name="updateCategory">Dữ liệu cập nhật cho category</param>
+        /// <param name="currentName">Tên hiện tại của category</param>
+        /// <exception cref="CategoryNameAlreadyExistsException">Ném ra khi tên category mới đã tồn tại</exception>
+        /// <exception cref="CategoryPrefixAlreadyExistsException">Ném ra khi mã tiền tố mới đã tồn tại</exception>
         private async Task ValidateCategoryUpdateAsync(UpdateCategoryDTO updateCategory, string currentName)
         {
             if (!string.IsNullOrEmpty(updateCategory.CateName) && updateCategory.CateName != currentName &&
@@ -103,6 +134,12 @@ namespace SonitCustom.BLL.Services
             }
         }
 
+        /// <summary>
+        /// Xử lý cập nhật thông tin category
+        /// </summary>
+        /// <param name="category">Đối tượng category hiện tại</param>
+        /// <param name="updateCategory">Dữ liệu cập nhật</param>
+        /// <returns>Đối tượng category đã được cập nhật</returns>
         private async Task<Category> ProcessCategoryUpdateAsync(Category category, UpdateCategoryDTO updateCategory)
         {
             if (string.IsNullOrEmpty(updateCategory.Prefix))
@@ -122,12 +159,22 @@ namespace SonitCustom.BLL.Services
             return category;
         }
 
+        /// <summary>
+        /// Tạo mã tiền tố mới từ tên category
+        /// </summary>
+        /// <param name="category">Tên category</param>
+        /// <returns>Mã tiền tố duy nhất</returns>
         private async Task<string> GeneratePrefixFromCategoryNameAsync(string category)
         {
             string suggestedPrefix = CreatePrefixFromCategoryName(category);
             return await GetUniquePrefixAsync(suggestedPrefix);
         }
 
+        /// <summary>
+        /// Tạo mã tiền tố ban đầu từ tên category
+        /// </summary>
+        /// <param name="category">Tên category</param>
+        /// <returns>Mã tiền tố được đề xuất</returns>
         private string CreatePrefixFromCategoryName(string category)
         {
             string[] words = category.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -140,12 +187,22 @@ namespace SonitCustom.BLL.Services
             return string.Join("", words.Select(w => w[0])).ToLower();
         }
 
+        /// <summary>
+        /// Đảm bảo mã tiền tố là duy nhất
+        /// </summary>
+        /// <param name="suggestedPrefix">Mã tiền tố đề xuất</param>
+        /// <returns>Mã tiền tố duy nhất</returns>
         private async Task<string> GetUniquePrefixAsync(string suggestedPrefix)
         {
             bool prefixExists = await _categoryRepository.CheckPrefixExistsAsync(suggestedPrefix);
             return prefixExists ? "sonit" : suggestedPrefix;
         }
 
+        /// <summary>
+        /// Tạo lại mã sản phẩm cho tất cả sản phẩm thuộc category sau khi cập nhật
+        /// </summary>
+        /// <param name="categoryId">ID của category đã cập nhật</param>
+        /// <param name="updatedCategory">Đối tượng category đã cập nhật</param>
         private async Task RegenerateProductIdsForCategory(int categoryId, Category updatedCategory)
         {
             List<Product> products = await _productRepository.GetAllProductOfCategoryAsync(categoryId);
@@ -161,6 +218,11 @@ namespace SonitCustom.BLL.Services
             }
         }
 
+        /// <summary>
+        /// Kiểm tra category không có sản phẩm nào trước khi xóa
+        /// </summary>
+        /// <param name="cateId">ID của category cần xóa</param>
+        /// <exception cref="CategoryHasProductsException">Ném ra khi category vẫn còn sản phẩm</exception>
         private async Task ValidateCategoryHasNoProductsAsync(int cateId)
         {
             int productCount = await _productRepository.GetProductCountByCategoryIdAsync(cateId);

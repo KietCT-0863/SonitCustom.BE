@@ -7,12 +7,20 @@ using System.Linq;
 
 namespace SonitCustom.BLL.Security
 {
+    /// <summary>
+    /// Service triển khai lưu trữ refresh token sử dụng bộ nhớ đệm
+    /// </summary>
     public class MemoryCacheTokenStorage : ITokenStorage
     {
         private readonly IMemoryCache _cache;
         private readonly TokenSettings _tokenSettings;
         private readonly ConcurrentDictionary<string, int> _tokenToUserIdMap;
 
+        /// <summary>
+        /// Khởi tạo đối tượng MemoryCacheTokenStorage
+        /// </summary>
+        /// <param name="cache">Bộ nhớ đệm</param>
+        /// <param name="tokenSettings">Cấu hình token</param>
         public MemoryCacheTokenStorage(IMemoryCache cache, TokenSettings tokenSettings)
         {
             _cache = cache;
@@ -20,6 +28,7 @@ namespace SonitCustom.BLL.Security
             _tokenToUserIdMap = new ConcurrentDictionary<string, int>();
         }
 
+        /// <inheritdoc />
         public void StoreRefreshToken(RefreshTokenDTO refreshToken)
         {
             if (_cache.TryGetValue(GetUserCacheKey(refreshToken.UserId), out RefreshTokenDTO oldToken))
@@ -35,6 +44,7 @@ namespace SonitCustom.BLL.Security
             _tokenToUserIdMap[refreshToken.Token] = refreshToken.UserId;
         }
 
+        /// <inheritdoc />
         public RefreshTokenDTO GetRefreshToken(string token)
         {
             if (_tokenToUserIdMap.TryGetValue(token, out int userId))
@@ -44,11 +54,13 @@ namespace SonitCustom.BLL.Security
             return null;
         }
 
+        /// <inheritdoc />
         public RefreshTokenDTO GetRefreshTokenByUserId(int userId)
         {
             return _cache.Get<RefreshTokenDTO>(GetUserCacheKey(userId));
         }
 
+        /// <inheritdoc />
         public void RemoveRefreshToken(string token)
         {
             if (_tokenToUserIdMap.TryGetValue(token, out int userId))
@@ -58,11 +70,17 @@ namespace SonitCustom.BLL.Security
             }
         }
 
+        /// <inheritdoc />
         public bool RefreshTokenExists(string token)
         {
             return _tokenToUserIdMap.ContainsKey(token);
         }
 
+        /// <summary>
+        /// Tạo khóa cache cho user ID
+        /// </summary>
+        /// <param name="userId">ID của người dùng</param>
+        /// <returns>Khóa cache dưới dạng chuỗi</returns>
         private string GetUserCacheKey(int userId)
         {
             return $"RefreshToken_User_{userId}";
