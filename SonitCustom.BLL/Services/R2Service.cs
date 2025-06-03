@@ -67,6 +67,12 @@ namespace SonitCustom.BLL.Services
             return response.HttpStatusCode == HttpStatusCode.NoContent;
         }
 
+        /// <inheritdoc />
+        public string GetPublicUrl()
+        {
+            return _publicUrl;
+        }
+
         /// <summary>
         /// Tạo client kết nối đến Cloudflare R2
         /// </summary>
