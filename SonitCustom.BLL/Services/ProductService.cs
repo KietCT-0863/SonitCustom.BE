@@ -310,7 +310,7 @@ namespace SonitCustom.BLL.Services
         private List<int> ExtractExistingProductNumbers(List<Product> products, string prefix)
         {
             var numbers = new List<int>();
-            string pattern = $@"{prefix}-(\d+)";
+            string pattern = $@"{prefix}(\d+)";
             var regex = new Regex(pattern);
 
             foreach (var product in products)
