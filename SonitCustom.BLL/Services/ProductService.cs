@@ -97,7 +97,6 @@ namespace SonitCustom.BLL.Services
         /// <returns>Khóa hình ảnh</returns>
         private string ExtractImageKey(string imageUrl)
         {
-            // Chỉ lấy phần tên file từ URL, không bao gồm PublicUrl
             return imageUrl.Substring(imageUrl.LastIndexOf('/') + 1);
         }
 
@@ -299,7 +298,7 @@ namespace SonitCustom.BLL.Services
             List<int> existingNumbers = ExtractExistingProductNumbers(productsInCategory, category.Prefix);
             int nextNumber = FindNextAvailableNumber(existingNumbers);
 
-            return $"{category.Prefix}-{nextNumber:D3}";
+            return $"{category.Prefix}{nextNumber:D3}";
         }
 
         /// <summary>
