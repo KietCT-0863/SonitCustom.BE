@@ -33,7 +33,7 @@ namespace SonitCustom.Controller.Controllers
         /// <response code="409">Tên đăng nhập hoặc email đã tồn tại</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost]
-        public async Task<IActionResult> Register([FromForm] RegisterUserDTO newRegister)
+        public async Task<IActionResult> Register(RegisterUserDTO newRegister)
         {
             try
             {

@@ -60,7 +60,7 @@ namespace SonitCustom.Controller.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> CreateCategory([FromForm] CreateCategoryDTO createCategoryDTO)
+        public async Task<IActionResult> CreateCategory(CreateCategoryDTO createCategoryDTO)
         {
             try
             {
@@ -96,7 +96,7 @@ namespace SonitCustom.Controller.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> UpdateCategory(int id, [FromForm] UpdateCategoryDTO categoryDTO)
+        public async Task<IActionResult> UpdateCategory(int id, UpdateCategoryDTO categoryDTO)
         {
             try
             {

@@ -117,7 +117,7 @@ namespace SonitCustom.Controller.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPut("me")]
         [Authorize]
-        public async Task<IActionResult> UpdateMe([FromForm] UpdateUserDTO updateUserDTO)
+        public async Task<IActionResult> UpdateMe(UpdateUserDTO updateUserDTO)
         {
             try
             {
@@ -168,7 +168,7 @@ namespace SonitCustom.Controller.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> AdminUpdateUser(int id, [FromForm] AdminUpdateUserDTO adminUpdateUserDTO)
+        public async Task<IActionResult> AdminUpdateUser(int id, AdminUpdateUserDTO adminUpdateUserDTO)
         {
             try
             {
@@ -282,7 +282,7 @@ namespace SonitCustom.Controller.Controllers
                 int adminId = CookieHelper.GetUserIdFromToken(User);
 
                 await _userService.DeleteAccountAsync(id);
-                
+
                 await _tokenService.RevokeRefreshTokenByUserIdAsync(id);
 
                 return Ok(new { message = "Xóa tài khoản người dùng thành công" });

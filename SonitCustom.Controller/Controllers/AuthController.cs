@@ -38,7 +38,7 @@ namespace SonitCustom.Controller.Controllers
         /// <response code="401">Thông tin đăng nhập không hợp lệ</response>
         /// <response code="500">Lỗi server</response>
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromForm] LoginRequestDTO request)
+        public async Task<IActionResult> Login(LoginRequestDTO request)
         {
             try
             {

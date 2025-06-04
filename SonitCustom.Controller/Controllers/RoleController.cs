@@ -81,7 +81,7 @@ namespace SonitCustom.Controller.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPost]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> CreateRole([FromForm] CreateRoleDTO createRoleDTO)
+        public async Task<IActionResult> CreateRole(CreateRoleDTO createRoleDTO)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace SonitCustom.Controller.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> UpdateRole(int id, [FromForm] UpdateRoleDTO updateRoleDTO)
+        public async Task<IActionResult> UpdateRole(int id, UpdateRoleDTO updateRoleDTO)
         {
             try
             {
