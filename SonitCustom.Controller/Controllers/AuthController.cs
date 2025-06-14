@@ -33,7 +33,7 @@ namespace SonitCustom.Controller.Controllers
         /// Đăng nhập vào hệ thống
         /// </summary>
         /// <param name="request">Thông tin đăng nhập</param>
-        /// <returns>Thông báo kết quả đăng nhập</returns>
+        /// <returns>Thông báo kết quả đăng nhập và tokens xác thực</returns>
         /// <response code="200">Đăng nhập thành công và trả về token xác thực</response>
         /// <response code="401">Thông tin đăng nhập không hợp lệ</response>
         /// <response code="500">Lỗi server</response>
@@ -52,10 +52,46 @@ namespace SonitCustom.Controller.Controllers
 
                 return Ok(new
                 {
-                    message = "Đăng nhập thành công"
+                    message = "Đăng nhập thành công",
+                    accessToken = accessToken.Token,
+                    refreshToken = refreshToken.Token,
+                    expiresAt = accessToken.ExpiresAt
                 });
             }
             catch (InvalidCredentialsException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// Làm mới access token khi hết hạn
+        /// </summary>
+        /// <param name="request">Refresh token request</param>
+        /// <returns>Access token mới</returns>
+        /// <response code="200">Tạo access token mới thành công</response>
+        /// <response code="401">Refresh token không hợp lệ</response>
+        /// <response code="500">Lỗi server</response>
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDTO request)
+        {
+            try
+            {
+                AccessTokenDTO accessToken = await _tokenService.RefreshAccessTokenAsync(request.RefreshToken);
+                
+                CookieHelper.SetAccessTokenCookie(Response, accessToken);
+                
+                return Ok(new
+                {
+                    accessToken = accessToken.Token,
+                    expiresAt = accessToken.ExpiresAt
+                });
+            }
+            catch (InvalidRefreshTokenException ex)
             {
                 return Unauthorized(new { message = ex.Message });
             }
@@ -87,5 +123,20 @@ namespace SonitCustom.Controller.Controllers
                 message = "Đăng xuất thành công"
             });
         }
+    }
+}
+
+// Thêm DTO cho refresh token request
+namespace SonitCustom.BLL.DTOs.Auth
+{
+    /// <summary>
+    /// Đối tượng dữ liệu yêu cầu làm mới access token
+    /// </summary>
+    public class RefreshTokenRequestDTO
+    {
+        /// <summary>
+        /// Token làm mới
+        /// </summary>
+        public string RefreshToken { get; set; } = string.Empty;
     }
 }
