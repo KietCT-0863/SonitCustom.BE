@@ -20,17 +20,5 @@ namespace SonitCustom.BLL.Interface.Security
         /// <param name="refreshToken">Refresh token cần xác thực</param>
         /// <returns>Đối tượng <see cref="RefreshTokenDTO"/> nếu hợp lệ, null nếu hết hạn hoặc không tồn tại</returns>
         Task<RefreshTokenDTO?> ValidateRefreshTokenAsync(string refreshToken);
-        
-        /// <summary>
-        /// Thu hồi refresh token
-        /// </summary>
-        /// <param name="refreshToken">Refresh token cần thu hồi</param>
-        Task RevokeRefreshTokenAsync(string refreshToken);
-        
-        /// <summary>
-        /// Thu hồi tất cả refresh token của người dùng
-        /// </summary>
-        /// <param name="userId">ID của người dùng</param>
-        Task RevokeRefreshTokenByUserIdAsync(int userId);
     }
 }

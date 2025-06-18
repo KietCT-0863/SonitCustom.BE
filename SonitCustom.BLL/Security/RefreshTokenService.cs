@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using SonitCustom.BLL.DTOs.Auth;
 using SonitCustom.BLL.Interface.Security;
 using SonitCustom.BLL.Settings;
+using System.Text;
 
 namespace SonitCustom.BLL.Security
 {
@@ -10,73 +11,88 @@ namespace SonitCustom.BLL.Security
     /// </summary>
     public class RefreshTokenService : IRefreshTokenService
     {
-        private readonly ITokenStorage _tokenStorage;
         private readonly TokenSettings _tokenSettings;
 
         /// <summary>
         /// Khởi tạo đối tượng RefreshTokenService
         /// </summary>
-        /// <param name="tokenStorage">Service lưu trữ token</param>
         /// <param name="tokenSettings">Cấu hình token</param>
-        public RefreshTokenService(ITokenStorage tokenStorage, TokenSettings tokenSettings)
+        public RefreshTokenService(TokenSettings tokenSettings)
         {
-            _tokenStorage = tokenStorage;
             _tokenSettings = tokenSettings;
         }
 
         /// <inheritdoc />
         public RefreshTokenDTO GenerateRefreshToken(int userId)
         {
-            byte[] randomNumber = new byte[32];
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomNumber);
-            }
-            string refreshToken = Convert.ToBase64String(randomNumber);
+            string randomString = GenerateRandomString();
+            string tokenData = $"{userId}:{randomString}";
+            string refreshToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(tokenData));
 
-            RefreshTokenDTO refreshTokenDTO = new RefreshTokenDTO
+            return new RefreshTokenDTO
             {
                 Token = refreshToken,
                 UserId = userId,
                 ExpiresAt = DateTime.UtcNow.AddDays(_tokenSettings.RefreshTokenExpirationDays),
                 CreatedAt = DateTime.UtcNow,
             };
-
-            _tokenStorage.StoreRefreshToken(refreshTokenDTO);
-
-            return refreshTokenDTO;
         }
 
         /// <inheritdoc />
         public async Task<RefreshTokenDTO?> ValidateRefreshTokenAsync(string refreshToken)
         {
-            RefreshTokenDTO? token = _tokenStorage.GetRefreshToken(refreshToken);
-            
-            if (token == null || token.ExpiresAt < DateTime.UtcNow)
+            try
+            {
+                int userId = ExtractUserIdFromToken(refreshToken);
+                if (userId <= 0)
+                {
+                    return null;
+                }
+                
+                return new RefreshTokenDTO
+                {
+                    UserId = userId,
+                    Token = refreshToken,
+                    ExpiresAt = DateTime.UtcNow.AddDays(_tokenSettings.RefreshTokenExpirationDays),
+                    CreatedAt = DateTime.UtcNow
+                };
+            }
+            catch
             {
                 return null;
             }
-
-            return token;
         }
 
-        /// <inheritdoc />
-        public async Task RevokeRefreshTokenAsync(string refreshToken)
+        /// <summary>
+        /// Tạo chuỗi ngẫu nhiên để sử dụng trong token
+        /// </summary>
+        /// <returns>Chuỗi ngẫu nhiên dưới dạng Base64</returns>
+        private string GenerateRandomString()
         {
-            if (_tokenStorage.RefreshTokenExists(refreshToken))
+            byte[] randomNumber = new byte[32];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
             {
-                _tokenStorage.RemoveRefreshToken(refreshToken);
+                rng.GetBytes(randomNumber);
             }
+            return Convert.ToBase64String(randomNumber);
         }
 
-        /// <inheritdoc />
-        public async Task RevokeRefreshTokenByUserIdAsync(int userId)
+        /// <summary>
+        /// Trích xuất userId từ refresh token
+        /// </summary>
+        /// <param name="refreshToken">Refresh token cần xử lý</param>
+        /// <returns>UserId nếu hợp lệ, 0 nếu không</returns>
+        private int ExtractUserIdFromToken(string refreshToken)
         {
-            RefreshTokenDTO? token = _tokenStorage.GetRefreshTokenByUserId(userId);
-            if (token != null)
+            string decodedToken = Encoding.UTF8.GetString(Convert.FromBase64String(refreshToken));
+            string[] parts = decodedToken.Split(':');
+            
+            if (parts.Length < 2 || !int.TryParse(parts[0], out int userId))
             {
-                _tokenStorage.RemoveRefreshToken(token.Token);
+                return 0;
             }
+            
+            return userId;
         }
     }
 } 

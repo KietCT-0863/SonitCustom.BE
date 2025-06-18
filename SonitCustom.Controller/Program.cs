@@ -51,6 +51,32 @@ namespace SonitCustom.Controller
                 {
                     c.IncludeXmlComments(xmlBLLPath);
                 }
+
+                // Cấu hình Swagger để sử dụng JWT Bearer
+                c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Description = "JWT Authorization header using the Bearer scheme."
+                });
+
+                c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+                {
+                    {
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                        {
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
             });
 
             // Add Memory Cache
@@ -86,7 +112,6 @@ namespace SonitCustom.Controller
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
             builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
-            builder.Services.AddScoped<ITokenStorage, MemoryCacheTokenStorage>();
 
             // Cấu hình Authentication
             builder.Services.AddAuthentication(options =>
@@ -104,16 +129,6 @@ namespace SonitCustom.Controller
                     ValidateAudience = false,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
-                };
-
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        // Lấy token từ cookie
-                        context.Token = context.Request.Cookies["access_token"];
-                        return Task.CompletedTask;
-                    }
                 };
             });
 

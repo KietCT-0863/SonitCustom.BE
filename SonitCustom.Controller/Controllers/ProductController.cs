@@ -5,7 +5,6 @@ using SonitCustom.BLL.DTOs.Products;
 using SonitCustom.BLL.Exceptions;
 using SonitCustom.BLL.Interface;
 using SonitCustom.BLL.Interface.Security;
-using SonitCustom.Controller.Helpers;
 
 namespace SonitCustom.Controller.Controllers
 {
@@ -94,8 +93,6 @@ namespace SonitCustom.Controller.Controllers
                     return BadRequest(ModelState);
                 }
 
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
-
                 await _productService.CreateProductWithImageAsync(productData, imageUpload.ProductImage);
 
                 return Ok(new { message = "Thêm sản phẩm thành công" });
@@ -144,8 +141,6 @@ namespace SonitCustom.Controller.Controllers
                     return BadRequest(ModelState);
                 }
 
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
-
                 await _productService.UpdateProductWithImageAsync(prodId, productDto, imageDto);
 
                 return Ok(new { message = "Chỉnh sửa sản phẩm thành công" });
@@ -187,8 +182,6 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
-
                 await _productService.DeleteProductAsync(prodId);
 
                 return Ok(new { message = "Đã xoá sản phẩm thành công" });
@@ -203,7 +196,7 @@ namespace SonitCustom.Controller.Controllers
             }
             catch (AmazonS3Exception s3Ex)
             {
-                return StatusCode(500, new { message = $"Lỗi xóa ảnh sản phẩm: {s3Ex.Message}", errorCode = s3Ex.ErrorCode });
+                return StatusCode(500, new { message = $"Lỗi xóa ảnh: {s3Ex.Message}", errorCode = s3Ex.ErrorCode });
             }
             catch (Exception ex)
             {

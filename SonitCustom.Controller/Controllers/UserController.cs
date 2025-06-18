@@ -5,6 +5,7 @@ using SonitCustom.Controller.Helpers;
 using SonitCustom.BLL.Interface.Security;
 using SonitCustom.BLL.DTOs.Users;
 using SonitCustom.BLL.Exceptions;
+using SonitCustom.BLL.DTOs.Auth;
 
 namespace SonitCustom.Controller.Controllers
 {
@@ -42,15 +43,10 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
                 List<UserDTO> users = await _userService.GetAllUsersAsync();
                 return Ok(users);
             }
             catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-            catch (InvalidRefreshTokenException ex)
             {
                 return Unauthorized(new { message = ex.Message });
             }
@@ -74,15 +70,7 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
-                string? accessToken = CookieHelper.GetAccessToken(Request);
-                if (string.IsNullOrEmpty(accessToken))
-                {
-                    throw new UnauthorizedAccessException("Phiên đăng nhập không hợp lệ");
-                }
-
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
-
-                int userId = CookieHelper.GetUserIdFromToken(User);
+                int userId = JwtHelper.GetUserIdFromToken(User);
                 RespondUserDTO? user = await _userService.GetUserByIdAsync(userId);
 
                 return Ok(user);
@@ -94,10 +82,6 @@ namespace SonitCustom.Controller.Controllers
             catch (UserNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidRefreshTokenException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -121,9 +105,7 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
-
-                int userId = CookieHelper.GetUserIdFromToken(User);
+                int userId = JwtHelper.GetUserIdFromToken(User);
 
                 await _userService.UpdateUserAsync(userId, updateUserDTO);
 
@@ -142,10 +124,6 @@ namespace SonitCustom.Controller.Controllers
                 return BadRequest(new { message = ex.Message });
             }
             catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-            catch (InvalidRefreshTokenException ex)
             {
                 return Unauthorized(new { message = ex.Message });
             }
@@ -172,8 +150,6 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
-
                 await _userService.AdminUpdateUserAsync(id, adminUpdateUserDTO);
 
                 return Ok(new { message = "Cập nhật thông tin người dùng thành công" });
@@ -198,10 +174,6 @@ namespace SonitCustom.Controller.Controllers
             {
                 return Unauthorized(new { message = ex.Message });
             }
-            catch (InvalidRefreshTokenException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
@@ -219,23 +191,13 @@ namespace SonitCustom.Controller.Controllers
         /// <response code="500">Lỗi server</response>
         [HttpDelete("me")]
         [Authorize]
-        public async Task<IActionResult> DeleteMe()
+        public async Task<IActionResult> DeleteMe([FromBody] RefreshTokenRequestDTO request)
         {
             try
             {
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
-
-                int userId = CookieHelper.GetUserIdFromToken(User);
+                int userId = JwtHelper.GetUserIdFromToken(User);
 
                 await _userService.DeleteAccountAsync(userId);
-
-                string? refreshToken = CookieHelper.GetRefreshToken(Request);
-                if (!string.IsNullOrEmpty(refreshToken))
-                {
-                    await _tokenService.RevokeRefreshTokenAsync(refreshToken);
-                }
-
-                CookieHelper.RemoveAllAuthCookies(Response);
 
                 return Ok(new { message = "Xóa tài khoản thành công" });
             }
@@ -248,10 +210,6 @@ namespace SonitCustom.Controller.Controllers
                 return NotFound(new { message = ex.Message });
             }
             catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-            catch (InvalidRefreshTokenException ex)
             {
                 return Unauthorized(new { message = ex.Message });
             }
@@ -277,15 +235,11 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
-
-                int adminId = CookieHelper.GetUserIdFromToken(User);
+                int adminId = JwtHelper.GetUserIdFromToken(User);
 
                 await _userService.DeleteAccountAsync(id);
 
-                await _tokenService.RevokeRefreshTokenByUserIdAsync(id);
-
-                return Ok(new { message = "Xóa tài khoản người dùng thành công" });
+                return Ok(new { message = "Xóa tài khoản thành công" });
             }
             catch (AdminDeleteException ex)
             {
@@ -296,10 +250,6 @@ namespace SonitCustom.Controller.Controllers
                 return NotFound(new { message = ex.Message });
             }
             catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-            catch (InvalidRefreshTokenException ex)
             {
                 return Unauthorized(new { message = ex.Message });
             }

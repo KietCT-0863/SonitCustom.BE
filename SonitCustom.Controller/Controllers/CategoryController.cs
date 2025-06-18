@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using SonitCustom.BLL.Interface;
-using SonitCustom.Controller.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using SonitCustom.BLL.Exceptions;
 using SonitCustom.BLL.Interface.Security;
@@ -64,7 +63,6 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
                 await _categoryService.CreateCategoryAsync(createCategoryDTO.CategoryName);
                 return Ok(new { message = "Tạo category thành công" });
             }
@@ -105,7 +103,6 @@ namespace SonitCustom.Controller.Controllers
                     return BadRequest(new { message = "ID category không hợp lệ" });
                 }
 
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
                 await _categoryService.UpdateCategoryAsync(id, categoryDTO);
                 return Ok(new { message = "Cập nhật category thành công" });
             }
@@ -156,7 +153,6 @@ namespace SonitCustom.Controller.Controllers
                     return BadRequest(new { message = "ID category không hợp lệ" });
                 }
 
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
                 await _categoryService.DeleteCategoryAsync(id);
                 return Ok(new { message = "Xóa category thành công" });
             }

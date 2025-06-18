@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using SonitCustom.BLL.Interface;
-using SonitCustom.Controller.Helpers;
 using SonitCustom.BLL.Interface.Security;
 using SonitCustom.BLL.DTOs.Users;
 using SonitCustom.BLL.DTOs.Auth;
@@ -47,9 +46,6 @@ namespace SonitCustom.Controller.Controllers
                 AccessTokenDTO accessToken = _tokenService.GenerateAccessToken(user.Id, user.RoleName);
                 RefreshTokenDTO refreshToken = _tokenService.GenerateRefreshToken(user.Id);
 
-                CookieHelper.SetAccessTokenCookie(Response, accessToken);
-                CookieHelper.SetRefreshTokenCookie(Response, refreshToken);
-
                 return Ok(new
                 {
                     message = "Đăng nhập thành công",
@@ -81,9 +77,12 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(request.RefreshToken))
+                {
+                    return Unauthorized(new { message = "Refresh token không được cung cấp" });
+                }
+
                 AccessTokenDTO accessToken = await _tokenService.RefreshAccessTokenAsync(request.RefreshToken);
-                
-                CookieHelper.SetAccessTokenCookie(Response, accessToken);
                 
                 return Ok(new
                 {
@@ -100,43 +99,5 @@ namespace SonitCustom.Controller.Controllers
                 return StatusCode(500, new { message = $"Lỗi hệ thống: {ex.Message}" });
             }
         }
-
-        /// <summary>
-        /// Đăng xuất khỏi hệ thống
-        /// </summary>
-        /// <returns>Thông báo kết quả đăng xuất</returns>
-        /// <response code="200">Đăng xuất thành công</response>
-        /// <response code="500">Lỗi server</response>
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            string? refreshToken = CookieHelper.GetRefreshToken(Request);
-            if (!string.IsNullOrEmpty(refreshToken))
-            {
-                await _tokenService.RevokeRefreshTokenAsync(refreshToken);
-            }
-
-            CookieHelper.RemoveAllAuthCookies(Response);
-
-            return Ok(new
-            {
-                message = "Đăng xuất thành công"
-            });
-        }
-    }
-}
-
-// Thêm DTO cho refresh token request
-namespace SonitCustom.BLL.DTOs.Auth
-{
-    /// <summary>
-    /// Đối tượng dữ liệu yêu cầu làm mới access token
-    /// </summary>
-    public class RefreshTokenRequestDTO
-    {
-        /// <summary>
-        /// Token làm mới
-        /// </summary>
-        public string RefreshToken { get; set; } = string.Empty;
     }
 }

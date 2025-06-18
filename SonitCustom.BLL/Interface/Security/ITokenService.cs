@@ -33,18 +33,6 @@ namespace SonitCustom.BLL.Interface.Security
         Task<AccessTokenDTO> RefreshAccessTokenAsync(string refreshToken);
         
         /// <summary>
-        /// Thu hồi refresh token
-        /// </summary>
-        /// <param name="refreshToken">Refresh token cần thu hồi</param>
-        Task RevokeRefreshTokenAsync(string refreshToken);
-        
-        /// <summary>
-        /// Thu hồi tất cả refresh token của người dùng
-        /// </summary>
-        /// <param name="userId">ID của người dùng</param>
-        Task RevokeRefreshTokenByUserIdAsync(int userId);
-        
-        /// <summary>
         /// Xác thực refresh token
         /// </summary>
         /// <param name="refreshToken">Refresh token cần xác thực</param>

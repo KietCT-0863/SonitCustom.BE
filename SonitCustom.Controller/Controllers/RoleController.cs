@@ -4,7 +4,6 @@ using SonitCustom.BLL.DTOs.Roles;
 using SonitCustom.BLL.Exceptions;
 using SonitCustom.BLL.Interface;
 using SonitCustom.BLL.Interface.Security;
-using SonitCustom.Controller.Helpers;
 
 namespace SonitCustom.Controller.Controllers
 {
@@ -85,7 +84,6 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
                 await _roleService.CreateRoleAsync(createRoleDTO);
                 return Ok(new { message = "Thêm role thành công" });
             }
@@ -94,10 +92,6 @@ namespace SonitCustom.Controller.Controllers
                 return Conflict(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-            catch (InvalidRefreshTokenException ex)
             {
                 return Unauthorized(new { message = ex.Message });
             }
@@ -124,7 +118,6 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
                 await _roleService.UpdateRoleAsync(id, updateRoleDTO);
                 return Ok(new { message = "Chỉnh sửa role thành công" });
             }
@@ -137,10 +130,6 @@ namespace SonitCustom.Controller.Controllers
                 return Conflict(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-            catch (InvalidRefreshTokenException ex)
             {
                 return Unauthorized(new { message = ex.Message });
             }
@@ -166,7 +155,6 @@ namespace SonitCustom.Controller.Controllers
         {
             try
             {
-                await CookieHelper.TryRefreshAccessToken(Request, Response, _tokenService);
                 await _roleService.DeleteRoleAsync(id);
                 return Ok(new { message = "Xoá role thành công" });
             }
@@ -179,10 +167,6 @@ namespace SonitCustom.Controller.Controllers
                 return BadRequest(new { message = ex.Message });
             }
             catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-            catch (InvalidRefreshTokenException ex)
             {
                 return Unauthorized(new { message = ex.Message });
             }

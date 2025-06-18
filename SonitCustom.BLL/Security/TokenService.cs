@@ -2,6 +2,7 @@ using SonitCustom.BLL.DTOs.Auth;
 using SonitCustom.BLL.Exceptions;
 using SonitCustom.BLL.Interface.Security;
 using SonitCustom.DAL.Interface;
+using System.Text;
 
 namespace SonitCustom.BLL.Security
 {
@@ -45,31 +46,22 @@ namespace SonitCustom.BLL.Security
         /// <inheritdoc />
         public async Task<AccessTokenDTO> RefreshAccessTokenAsync(string refreshToken)
         {
-            RefreshTokenDTO? validRefreshToken = await _refreshTokenService.ValidateRefreshTokenAsync(refreshToken);
-            if (validRefreshToken == null)
+            // Xác thực refresh token và lấy thông tin người dùng
+            RefreshTokenDTO? validatedToken = await ValidateRefreshTokenAsync(refreshToken);
+            if (validatedToken == null)
             {
                 throw new InvalidRefreshTokenException("Invalid refresh token");
             }
 
-            string? role = await _userRepository.GetRoleByUserIdAsync(validRefreshToken.UserId);
+            // Lấy thông tin role của user
+            string? role = await _userRepository.GetRoleByUserIdAsync(validatedToken.UserId);
             if (string.IsNullOrEmpty(role))
             {
                 throw new Exception("User role not found");
             }
 
-            return _accessTokenService.GenerateAccessToken(validRefreshToken.UserId, role);
-        }
-
-        /// <inheritdoc />
-        public async Task RevokeRefreshTokenAsync(string refreshToken)
-        {
-            await _refreshTokenService.RevokeRefreshTokenAsync(refreshToken);
-        }
-
-        /// <inheritdoc />
-        public async Task RevokeRefreshTokenByUserIdAsync(int userId)
-        {
-            await _refreshTokenService.RevokeRefreshTokenByUserIdAsync(userId);
+            // Tạo access token mới
+            return GenerateAccessToken(validatedToken.UserId, role);
         }
 
         /// <inheritdoc />
